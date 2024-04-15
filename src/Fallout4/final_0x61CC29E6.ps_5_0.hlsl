@@ -284,7 +284,7 @@ void main(
   r1.xyz = r0.xyz + -r2.xyz;				
   r0.xyz = saturate(r1.xyz * cb2[4].zzz + r0.xyz);	//Blend
   r1.xyz = r2.xyz + -r0.xyz;				//Can't touch, gets out of range
-  o1.xyz = abs(cb2[4].www * r2.xyz + r0.xyz * r2.xyz);	//Output RGB, currently gamma, for linear: abs(cb2[4].www * r2.xyz + r0.xyz * r2.xyz);
+  o1.xyz = abs(cb2[4].www * r2.xyz + r0.xyz * r2.xyz);	//Output RGB, currently linear, for gamma: abs(cb2[4].www * r2.xyz + r0.xyz);
   o1.w = 1;									//Output A
   return;
 }
