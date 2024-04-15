@@ -21,6 +21,7 @@ list(APPEND ADDON_LIST batman-arkhamknight)
 list(APPEND ADDON_LIST tunic)
 list(APPEND ADDON_LIST dxmd)
 list(APPEND ADDON_LIST horizonfw)
+list(APPEND ADDON_LIST fallout4)
 
 # Use executable to convert resources to .h files for embedding
 add_executable(embedfile embedfile.c)
