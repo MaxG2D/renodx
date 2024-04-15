@@ -7,20 +7,15 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x12200F17.h>
-#include <embed/0x2AC7F89E.h>
-#include <embed/0x2C2D0899.h>
-#include <embed/0x311E0BDA.h>
-#include <embed/0x3A4E0B90.h>
-#include <embed/0x420BA351.h>
-#include <embed/0x5DAD9473.h>
-#include <embed/0x7527C8AD.h>
-#include <embed/0x8D4B625A.h>
-#include <embed/0x978BFB09.h>
-#include <embed/0xB6B56605.h>
-#include <embed/0xBD36EC09.h>
-#include <embed/0xF01CCC7E.h>
-#include <embed/0xF3B4727D.h>
+#include <embed/0x10A3CFDD.h>
+#include <embed/0x156045DD.h>
+#include <embed/0x231D2C5F.h>
+#include <embed/0x496A13D7.h>
+#include <embed/0x77E6AD1C.h>
+#include <embed/0x7C03A997.h>
+#include <embed/0xA4621F49.h>
+#include <embed/0xA558B81D.h>
+#include <embed/0xE45962D5.h>
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -30,24 +25,20 @@
 #include "../common/userSettingUtil.hpp"
 #include "./shared.h"
 
-extern "C" __declspec(dllexport) const char* NAME = "RenoDX - Batman: Arkham Knight";
-extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for Batman: Arkham Knight";
+extern "C" __declspec(dllexport) const char* NAME = "RenoDX - LA Noire";
+extern "C" __declspec(dllexport) const char* DESCRIPTION = "RenoDX for LA Noire";
 
 ShaderReplaceMod::CustomShaders customShaders = {
-  CustomShaderEntry(0x2C2D0899),  // ui
-  CustomShaderEntry(0x5DAD9473),  // ui
-  CustomShaderEntry(0x311E0BDA),  // ui
-  CustomShaderEntry(0x2AC7F89E),  // ui
-  CustomShaderEntry(0x7527C8AD),  // ui
-  CustomShaderEntry(0xF3B4727D),  // ui
-  CustomShaderEntry(0x8D4B625A),  // ui
-  CustomShaderEntry(0xBD36EC09),  // ui
-  CustomShaderEntry(0x420BA351),  // ui
-  CustomShaderEntry(0x12200F17),  // video
-  CustomShaderEntry(0xB6B56605),  // tonemap
-  CustomShaderEntry(0x978BFB09),  // tonemap + motionblur
-  CustomShaderEntry(0xF01CCC7E),  // tonemap + fx
-  CustomShaderEntry(0x3A4E0B90)   // tonemap + fx + motionblur
+  CustomShaderEntry(0x231D2C5F),
+  CustomShaderEntry(0xA4621F49),
+  CustomShaderEntry(0x7C03A997),
+  CustomShaderEntry(0x77E6AD1C),
+  CustomShaderEntry(0xA558B81D),
+  CustomShaderEntry(0xE45962D5),
+  CustomShaderEntry(0x156045DD),
+  CustomShaderEntry(0x496A13D7),
+  CustomShaderEntry(0x10A3CFDD)
+
 };
 
 ShaderInjectData shaderInjection;
@@ -63,7 +54,7 @@ UserSettingUtil::UserSettings userSettings = {
     .label = "Tone Mapper",
     .section = "Tone Mapping",
     .tooltip = "Sets the tone mapper type",
-    .labels = {"Vanilla", "None", "ACES", "RenoDX"}
+    .labels = {"Vanilla", "None", "ACES", "RenoDRT"}
   },
   new UserSettingUtil::UserSetting {
     .key = "toneMapPeakNits",
@@ -80,7 +71,6 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "toneMapGameNits",
     .binding = &shaderInjection.toneMapGameNits,
     .defaultValue = 203.f,
-    .canReset = false,
     .label = "Game Brightness",
     .section = "Tone Mapping",
     .tooltip = "Sets the value of 100%% white in nits",
@@ -91,7 +81,6 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "toneMapUINits",
     .binding = &shaderInjection.toneMapUINits,
     .defaultValue = 203.f,
-    .canReset = false,
     .label = "UI Brightness",
     .section = "Tone Mapping",
     .tooltip = "Sets the brightness of UI and HUD elements in nits",
@@ -144,13 +133,22 @@ UserSettingUtil::UserSettings userSettings = {
     .parse = [](float value) { return value * 0.02f; }
   },
   new UserSettingUtil::UserSetting {
-    .key = "colorGradeLUTStrength",
-    .binding = &shaderInjection.colorGradeLUTStrength,
+    .key = "colorGradeColorFilter",
+    .binding = &shaderInjection.colorGradeColorFilter,
     .defaultValue = 100.f,
-    .label = "LUT Strength",
+    .label = "Color Filter",
     .section = "Color Grading",
     .max = 100.f,
     .parse = [](float value) { return value * 0.01f; }
+  },
+    new UserSettingUtil::UserSetting {
+    .key = "fxDoF",
+    .binding = &shaderInjection.fxDoF,
+    .defaultValue = 50.f,
+    .label = "Depth of Field",
+    .section = "Effects",
+    .max = 100.f,
+    .parse = [](float value) { return value * 0.02f; }
   },
   new UserSettingUtil::UserSetting {
     .key = "fxBloom",
@@ -162,10 +160,10 @@ UserSettingUtil::UserSettings userSettings = {
     .parse = [](float value) { return value * 0.02f; }
   },
   new UserSettingUtil::UserSetting {
-    .key = "fxVignette",
-    .binding = &shaderInjection.fxVignette,
+    .key = "fxMask",
+    .binding = &shaderInjection.fxMask,
     .defaultValue = 50.f,
-    .label = "fxVignette",
+    .label = "Mask",
     .section = "Effects",
     .max = 100.f,
     .parse = [](float value) { return value * 0.02f; }
@@ -174,10 +172,30 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "fxFilmGrain",
     .binding = &shaderInjection.fxFilmGrain,
     .defaultValue = 50.f,
-    .label = "fxFilmGrain",
+    .label = "Film Grain",
     .section = "Effects",
     .max = 100.f,
     .parse = [](float value) { return value * 0.02f; }
+  },
+  new UserSettingUtil::UserSetting {
+    .key = "fxMotionBlur",
+    .binding = &shaderInjection.fxMotionBlur,
+    .defaultValue = 50.f,
+    .label = "Motion Blur",
+    .section = "Effects",
+    .max = 100.f,
+    .parse = [](float value) { return value * 0.02f; }
+  },
+  new UserSettingUtil::UserSetting {
+    .key = "fxBlackWhite",
+    .binding = &shaderInjection.fxBlackWhite,
+    .valueType = UserSettingUtil::UserSettingValueType::integer,
+    .defaultValue = 1.f,
+    .canReset = false,
+    .label = "Black & White",
+    .section = "Effects",
+    .tooltip = "Method used to apply black and white effect.",
+    .labels = {"Vanilla", "By Luminance", "By Chrominance"}
   }
 };
 
@@ -193,10 +211,13 @@ static void onPresetOff() {
   UserSettingUtil::updateUserSetting("colorGradeShadows", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeContrast", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeSaturation", 50.f);
-  UserSettingUtil::updateUserSetting("colorGradeLUTStrength", 100.f);
+  UserSettingUtil::updateUserSetting("colorGradeColorFilter", 100.f);
+  UserSettingUtil::updateUserSetting("fxDoF", 50.f);
   UserSettingUtil::updateUserSetting("fxBloom", 50.f);
-  UserSettingUtil::updateUserSetting("fxVignette", 50.f);
+  UserSettingUtil::updateUserSetting("fxMask", 50.f);
   UserSettingUtil::updateUserSetting("fxFilmGrain", 50.f);
+  UserSettingUtil::updateUserSetting("fxMotionBlur", 50.f);
+  UserSettingUtil::updateUserSetting("fxBlackWhite", 0);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID) {
@@ -204,9 +225,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID) {
     case DLL_PROCESS_ATTACH:
       if (!reshade::register_addon(hModule)) return FALSE;
 
-      SwapChainUpgradeMod::preventFullScreen = false;
+      ShaderReplaceMod::expectedConstantBufferIndex = 11;
       SwapChainUpgradeMod::swapChainUpgradeTargets.push_back(
-        {reshade::api::format::r8g8b8a8_unorm, reshade::api::format::r16g16b16a16_float, 3}
+        {reshade::api::format::r8g8b8a8_unorm, reshade::api::format::r16g16b16a16_float}
       );
 
       break;
@@ -216,9 +237,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID) {
   }
 
   UserSettingUtil::use(fdwReason, &userSettings, &onPresetOff);
-
   SwapChainUpgradeMod::use(fdwReason);
-
   ShaderReplaceMod::use(fdwReason, &customShaders, &shaderInjection);
 
   return TRUE;
