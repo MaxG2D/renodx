@@ -7,12 +7,12 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x61CC29E6.h> // TAA
+#include <embed/0x61CC29E6.h> // TAA (SLIGHTLY BROKEN BY UPGRADE, TOO BAD!)
 #include <embed/0x676B8B5D.h> // Tonemapping
 #include <embed/0x8024E8B5.h> // Tonemapping
-#include <embed/0x80802E60.h> // LUT
-#include <embed/0x0E30E611.h> // SunSpecular, SunDirectionalLighting
-#include <embed/0x516537DC.h> // SunDisk (it's very dim in vanilla, can't really be changed with Creation Kit)
+#include <embed/0x80802E60.h> // LUT (YEETED COMPLETELY, TOO BAD!)
+#include <embed/0x0E30E611.h> // SunSpecular, SunDirectionalLighting (BROKEN FOR NOW, NOT ALL SHADER VARIANTS REPLACED, TOO BAD!)
+#include <embed/0x516537DC.h> // SunDisk (it's very dim in vanilla, can't really be changed with Creation Kit, BROKEN FOR NOW, TOO BAD!)
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -45,7 +45,6 @@ UserSettingUtil::UserSettings userSettings = {
     .label = "SunSpecularAmount",
     .section = "GameHDRValues",
     .max = 100.f,
-    .parse = [](float value) { return value * 0.02f; }
   },
     new UserSettingUtil::UserSetting {
     .key = "fxSunDirectionalAmount",
@@ -54,7 +53,6 @@ UserSettingUtil::UserSettings userSettings = {
     .label = "SunDirectionalAmount",
     .section = "GameHDRValues",
     .max = 100.f,
-    .parse = [](float value) { return value * 0.02f; }
   },
       new UserSettingUtil::UserSetting {
     .key = "fxSunDiskAmount",
@@ -63,7 +61,6 @@ UserSettingUtil::UserSettings userSettings = {
     .label = "SunDiskAmount",
     .section = "GameHDRValues",
     .max = 100.f,
-    .parse = [](float value) { return value * 0.02f; }
   }
 };
 

@@ -30,8 +30,8 @@ void main(
   float2 v1 : TEXCOORD0,
   float2 w1 : TEXCOORD1,
   float4 v2 : COLOR0,
-  float4 v3 : POSITION2,
-  float4 v4 : POSITION3,
+  float4 v3 : POSITION2,        //Not sure what to do about that
+  float4 v4 : POSITION3,        //Not sure what to do about that
   out float4 o0 : SV_Target0,
   out float4 o1 : SV_Target1)
 {
