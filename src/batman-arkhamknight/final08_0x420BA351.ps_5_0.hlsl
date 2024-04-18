@@ -1,3 +1,5 @@
+// writes to texture or swapchain
+
 #include "./shared.h"
 
 Texture2D<float4> t1 : register(t1);
@@ -34,6 +36,7 @@ void main(float4 v0 : TEXCOORD0, float4 v1 : TEXCOORD1, float2 v2 : TEXCOORD2, o
       r1.y = cb0[8].y + r2.y;
       r0.zw = r1.xy * cb0[11].xy + v2.xy;
       r0.z = t1.SampleLevel(s1_s, r0.zw, 0).w;
+      r0.z = saturate(r0.z); // sdr clamp
       r2.x = r2.x + r0.z;
       r2.y = 1 + r2.y;
     }
@@ -43,6 +46,9 @@ void main(float4 v0 : TEXCOORD0, float4 v1 : TEXCOORD1, float2 v2 : TEXCOORD2, o
   r0.x = cb0[6].w * r0.x;
   r0.yz = cb0[10].xy * v2.xy;
   r1.xyzw = t0.SampleLevel(s0_s, r0.yz, 0).xyzw;
+
+  r1 = saturate(r1); // SDR Clamp
+
   r0.y = 1 + -r1.w;
   r0.x = r0.x * r0.y;
   r0.x = saturate(cb0[6].z * r0.x);
@@ -58,7 +64,7 @@ void main(float4 v0 : TEXCOORD0, float4 v1 : TEXCOORD1, float2 v2 : TEXCOORD2, o
   o0.xyz = exp2(r0.xyz);
   o0.w = r0.w;
 
-  o0.rgb = pow(o0.rgb, 2.2f);
+  o0.rgb = pow(saturate(o0.rgb), 2.2f);
   o0.rgb *= injectedData.toneMapUINits / 80.f;
   return;
 }

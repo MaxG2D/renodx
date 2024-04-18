@@ -205,6 +205,15 @@ float4 linearFromSRGB(float4 color) {
   );
 }
 
+float4 linearFromSRGBA(float4 color) {
+  return float4(
+    linearFromSRGB(color.r),
+    linearFromSRGB(color.g),
+    linearFromSRGB(color.b),
+    linearFromSRGB(color.a)
+  );
+}
+
 float arriC800FromLinear(float x, float cut = 0.010591f) {
   const float a = 5.555556f;
   const float b = 0.052272f;
@@ -356,6 +365,17 @@ float3 gammaCorrectEmulate22(float3 color, bool inverse = false) {
     gammaCorrectEmulate22(color.g),
     gammaCorrectEmulate22(color.b)
   );
+}
+
+float3 hueCorrection(float3 incorrectColor, float3 correctColor) {
+  float3 correctLCh = okLChFromBT709(correctColor);
+  float3 incorrectLCh = okLChFromBT709(incorrectColor);
+  incorrectLCh[2] = correctLCh[2];
+  float3 color = bt709FromOKLCh(incorrectLCh);
+  color = mul(BT709_2_AP1_MAT, color);  // Convert to AP1
+  color = max(0, color);                // Clamp to AP1
+  color = mul(AP1_2_BT709_MAT, color);  // Convert BT709
+  return color;
 }
 
 #endif  // SRC_COMMON_COLOR_HLSL_

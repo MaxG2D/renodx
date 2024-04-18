@@ -71,6 +71,7 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "toneMapGameNits",
     .binding = &shaderInjection.toneMapGameNits,
     .defaultValue = 203.f,
+    .canReset = false,
     .label = "Game Brightness",
     .section = "Tone Mapping",
     .tooltip = "Sets the value of 100%% white in nits",
@@ -81,11 +82,22 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "toneMapUINits",
     .binding = &shaderInjection.toneMapUINits,
     .defaultValue = 203.f,
+    .canReset = false,
     .label = "UI Brightness",
     .section = "Tone Mapping",
     .tooltip = "Sets the brightness of UI and HUD elements in nits",
     .min = 48.f,
     .max = 500.f
+  },
+  new UserSettingUtil::UserSetting {
+    .key = "toneMapGammaCorrection",
+    .binding = &shaderInjection.toneMapGammaCorrection,
+    .valueType = UserSettingUtil::UserSettingValueType::boolean,
+    .defaultValue = 1.f,
+    .canReset = false,
+    .label = "Gamma Correction",
+    .section = "Tone Mapping",
+    .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
   },
   new UserSettingUtil::UserSetting {
     .key = "colorGradeExposure",
@@ -191,7 +203,6 @@ UserSettingUtil::UserSettings userSettings = {
     .binding = &shaderInjection.fxBlackWhite,
     .valueType = UserSettingUtil::UserSettingValueType::integer,
     .defaultValue = 1.f,
-    .canReset = false,
     .label = "Black & White",
     .section = "Effects",
     .tooltip = "Method used to apply black and white effect.",
@@ -206,6 +217,7 @@ static void onPresetOff() {
   UserSettingUtil::updateUserSetting("toneMapPeakNits", 203.f);
   UserSettingUtil::updateUserSetting("toneMapGameNits", 203.f);
   UserSettingUtil::updateUserSetting("toneMapUINits", 203.f);
+  UserSettingUtil::updateUserSetting("toneMapGammaCorrection", 0);
   UserSettingUtil::updateUserSetting("colorGradeExposure", 1.f);
   UserSettingUtil::updateUserSetting("colorGradeHighlights", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeShadows", 50.f);
@@ -217,7 +229,7 @@ static void onPresetOff() {
   UserSettingUtil::updateUserSetting("fxMask", 50.f);
   UserSettingUtil::updateUserSetting("fxFilmGrain", 50.f);
   UserSettingUtil::updateUserSetting("fxMotionBlur", 50.f);
-  UserSettingUtil::updateUserSetting("fxBlackWhite", 0);
+  UserSettingUtil::updateUserSetting("fxBlackWhite", 0.f);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID) {
@@ -226,6 +238,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID) {
       if (!reshade::register_addon(hModule)) return FALSE;
 
       ShaderReplaceMod::expectedConstantBufferIndex = 11;
+      ShaderReplaceMod::traceUnmodifiedShaders = true;
+      SwapChainUpgradeMod::forceBorderless = false;
+      SwapChainUpgradeMod::preventFullScreen = false;
       SwapChainUpgradeMod::swapChainUpgradeTargets.push_back(
         {reshade::api::format::r8g8b8a8_unorm, reshade::api::format::r16g16b16a16_float}
       );
