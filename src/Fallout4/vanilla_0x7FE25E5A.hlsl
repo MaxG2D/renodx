@@ -1,11 +1,5 @@
-#include "./shared.h"
-
-// Sun Apr 14 14:06:54 2024
-Texture2D<float4> t1 : register(t1);
-
+// Sun Apr 14 14:07:01 2024
 Texture2D<float4> t0 : register(t0);
-
-SamplerState s1_s : register(s1);
 
 SamplerState s0_s : register(s0);
 
@@ -21,6 +15,7 @@ cbuffer cb12 : register(b12)
 
 
 
+
 //  declarations
 #define cmp -
 
@@ -28,10 +23,9 @@ cbuffer cb12 : register(b12)
 void main(
   float4 v0 : SV_POSITION0,
   float2 v1 : TEXCOORD0,
-  float2 w1 : TEXCOORD1,
   float4 v2 : COLOR0,
-  float4 v3 : POSITION2,        //Not sure what to do about that
-  float4 v4 : POSITION3,        //Not sure what to do about that
+  float4 v3 : POSITION0,
+  float4 v4 : POSITION1,
   out float4 o0 : SV_Target0,
   out float4 o1 : SV_Target1)
 {
@@ -39,12 +33,12 @@ void main(
   uint4 bitmask, uiDest;
   float4 fDest;
 
-  r0.xyzw = t1.Sample(s1_s, w1.xy).xyzw;
-  r1.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
-  r0.xyzw = -r1.xyzw + r0.xyzw;
-  r0.xyzw = cb2[0].xxxx * r0.xyzw + r1.xyzw;
+  r0.xyzw = t0.Sample(s0_s, v1.xy).xyzw;
+  r0.w = log2(r0.w);
   r0.xyz = v2.xyz * r0.xyz;
-  o0.w = (v2.w * r0.w) * injectedData.fxSunDiskAmount; // injectedData.fxSunDiskAmount
+  r0.w = 2.20000005 * r0.w;
+  r0.w = exp2(r0.w);
+  o0.w = v2.w * r0.w;
   r1.xyz = cb2[0].yyy * r0.xyz;
   r0.w = cmp(0 < cb2[0].y);
   o0.xyz = r0.www ? r1.xyz : r0.xyz;

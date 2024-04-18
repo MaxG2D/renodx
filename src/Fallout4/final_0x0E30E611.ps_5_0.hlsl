@@ -50,7 +50,7 @@ void main(
   r0.z = cmp(abs(r0.z) >= 0.25);
   if (r0.z != 0) {
     r0.xyz = t6.SampleLevel(s6_s, r0.xy, 0).xyz;
-    r0.xyz = r0.xyz * injectedData.fxSunSpecularAmount + r3.xyz; // injectedData.fxSunSpecularAmount
+    r0.xyz = r0.xyz * injectedData.fxSpecularAmount + r3.xyz; // injectedData.fxSpecularAmount
     r1.xyz = r2.xyz * float3(3,3,3) + r0.xyz;
   }
   o0.xyzw = r1.xyzw;

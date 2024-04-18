@@ -4,7 +4,7 @@
 // Must be 32bit aligned
 // Should be 4x32
 struct ShaderInjectData {
-  float fxSunSpecularAmount;
+  float fxSpecularAmount;
   float fxSunDirectionalAmount;
   float fxSunDiskAmount;
 };

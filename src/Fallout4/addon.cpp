@@ -11,8 +11,8 @@
 #include <embed/0x676B8B5D.h> // Tonemapping
 #include <embed/0x8024E8B5.h> // Tonemapping
 #include <embed/0x80802E60.h> // LUT (YEETED COMPLETELY, TOO BAD!)
-#include <embed/0x0E30E611.h> // SunSpecular, SunDirectionalLighting (BROKEN FOR NOW, NOT ALL SHADER VARIANTS REPLACED, TOO BAD!)
-#include <embed/0x516537DC.h> // SunDisk (it's very dim in vanilla, can't really be changed with Creation Kit, BROKEN FOR NOW, TOO BAD!)
+#include <embed/0x0E30E611.h> // Specular, SunDirectionalLighting (BROKEN FOR NOW, NOT ALL SHADER VARIANTS REPLACED, TOO BAD!)
+#include <embed/0x7FE25E5A.h> // SunDisk (it's very dim in vanilla, can't really be changed with Creation Kit)
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -31,7 +31,7 @@ ShaderReplaceMod::CustomShaders customShaders = {
   CustomShaderEntry(0x8024E8B5),
   CustomShaderEntry(0x80802E60),
   CustomShaderEntry(0x0E30E611),
-  CustomShaderEntry(0x516537DC)
+  CustomShaderEntry(0x7FE25E5A)
 };
 
 ShaderInjectData shaderInjection;
@@ -39,10 +39,10 @@ ShaderInjectData shaderInjection;
 // clang-format off
 UserSettingUtil::UserSettings userSettings = {
     new UserSettingUtil::UserSetting {
-    .key = "fxSunSpecularAmount",
-    .binding = &shaderInjection.fxSunSpecularAmount,
+    .key = "fxSpecularAmount",
+    .binding = &shaderInjection.fxSpecularAmount,
     .defaultValue = 1.f,
-    .label = "SunSpecularAmount",
+    .label = "SpecularAmount",
     .section = "GameHDRValues",
     .max = 100.f,
   },
