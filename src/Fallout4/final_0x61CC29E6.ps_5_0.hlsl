@@ -247,7 +247,7 @@ void main(
   r1.yw = r0.yy ? r12.xw : r5.xw;				
   r5.xy = r5.zx + -r5.yy;					//TAA Stuff, makes it softer a lot
   r0.z = 128 * cb2[0].x;					
-  r6.z = r0.x / r0.z;						
+  r6.z = saturate(r0.x / r0.z);					
   r0.x = r6.z + -r1.w;						
   r0.z = r1.y + -r12.x;												
   r1.yw = -abs(r0.xx) * float2(20,100) + float2(1,1);

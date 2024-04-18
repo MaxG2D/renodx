@@ -13,6 +13,9 @@
 #include <embed/0x80802E60.h> // LUT (YEETED COMPLETELY, TOO BAD!)
 #include <embed/0x0E30E611.h> // Specular, SunDirectionalLighting (BROKEN FOR NOW, NOT ALL SHADER VARIANTS REPLACED, TOO BAD!)
 #include <embed/0x7FE25E5A.h> // SunDisk (it's very dim in vanilla, can't really be changed with Creation Kit)
+#include <embed/0x2C49CF0C.h> // Removing Gamma Correction from menu item inspect screen - part 1
+#include <embed/0x58010595.h> // Removing Gamma Correction from menu item inspect screen - part 2
+//#include <embed/0xB14DB0F4.h> // Color - UI blend??? (at least the menu one)???
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -31,7 +34,10 @@ ShaderReplaceMod::CustomShaders customShaders = {
   CustomShaderEntry(0x8024E8B5),
   CustomShaderEntry(0x80802E60),
   CustomShaderEntry(0x0E30E611),
-  CustomShaderEntry(0x7FE25E5A)
+  CustomShaderEntry(0x7FE25E5A),
+  CustomShaderEntry(0x2C49CF0C),
+  CustomShaderEntry(0x58010595)
+  //CustomShaderEntry(0xB14DB0F4)
 };
 
 ShaderInjectData shaderInjection;
@@ -60,7 +66,7 @@ UserSettingUtil::UserSettings userSettings = {
     .defaultValue = 1.f,
     .label = "SunDiskAmount",
     .section = "GameHDRValues",
-    .max = 100.f,
+    .max = 100000.f,
   }
 };
 
