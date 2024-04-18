@@ -7,7 +7,7 @@
 
 #define DEBUG_LEVEL_0
 
-#include <embed/0x61CC29E6.h> // TAA (SLIGHTLY BROKEN BY UPGRADE, TOO BAD!)
+#include <embed/0x61CC29E6.h> // TAA
 #include <embed/0x676B8B5D.h> // Tonemapping
 #include <embed/0x8024E8B5.h> // Tonemapping
 #include <embed/0x80802E60.h> // LUT (YEETED COMPLETELY, TOO BAD!)
@@ -16,6 +16,7 @@
 #include <embed/0x2C49CF0C.h> // Removing Gamma Correction from menu item inspect screen - part 1
 #include <embed/0x58010595.h> // Removing Gamma Correction from menu item inspect screen - part 2
 //#include <embed/0xB14DB0F4.h> // Color - UI blend??? (at least the menu one)???
+#include <embed/0xBA5E7BEF.h> // Fix negative colors on on-screen blood effect
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -36,8 +37,9 @@ ShaderReplaceMod::CustomShaders customShaders = {
   CustomShaderEntry(0x0E30E611),
   CustomShaderEntry(0x7FE25E5A),
   CustomShaderEntry(0x2C49CF0C),
-  CustomShaderEntry(0x58010595)
+  CustomShaderEntry(0x58010595),
   //CustomShaderEntry(0xB14DB0F4)
+  CustomShaderEntry(0xBA5E7BEF)
 };
 
 ShaderInjectData shaderInjection;
