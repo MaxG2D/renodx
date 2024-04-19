@@ -51,7 +51,11 @@ void main(
   r1.x = cmp(r1.x < 0);
   if (r1.x != 0) discard;
   r1.x = cmp(cb0[1].y == 0.000000);
-  r1.xyzw = t6.Sample(s6_s, v1.xy).xyzw;
+    if (r1.x != 0) {
+    r1.xyzw = t6.Sample(s6_s, v1.xy).xyzw;
+  } else {
+    r1.xyzw = t6.Sample(s6_s, v1.xy).xyzw;
+  }
   r1.xyz = r1.xyz * cb0[1].www + r0.xyz;
   r0.x = cmp(cb0[1].x != 0.000000);
   r2.xyzw = cb1[0].wwww * r1.xyzw;
