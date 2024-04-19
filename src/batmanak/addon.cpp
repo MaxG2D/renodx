@@ -109,6 +109,16 @@ UserSettingUtil::UserSettings userSettings = {
     .max = 500.f
   },
   new UserSettingUtil::UserSetting {
+    .key = "toneMapGammaCorrection",
+    .binding = &shaderInjection.toneMapGammaCorrection,
+    .valueType = UserSettingUtil::UserSettingValueType::boolean,
+    .defaultValue = 1.f,
+    .canReset = false,
+    .label = "Gamma Correction",
+    .section = "Tone Mapping",
+    .tooltip = "Emulates a 2.2 EOTF (use with HDR or sRGB)",
+  },
+  new UserSettingUtil::UserSetting {
     .key = "colorGradeExposure",
     .binding = &shaderInjection.colorGradeExposure,
     .defaultValue = 1.f,
@@ -154,6 +164,16 @@ UserSettingUtil::UserSettings userSettings = {
     .parse = [](float value) { return value * 0.02f; }
   },
   new UserSettingUtil::UserSetting {
+    .key = "colorGradeBlowout",
+    .binding = &shaderInjection.colorGradeBlowout,
+    .defaultValue = 0.f,
+    .label = "Blowout",
+    .section = "Color Grading",
+    .tooltip = "Controls highlight desaturation due to overexposure.",
+    .max = 100.f,
+    .parse = [](float value) { return value * 0.01f; }
+  },
+  new UserSettingUtil::UserSetting {
     .key = "colorGradeLUTStrength",
     .binding = &shaderInjection.colorGradeLUTStrength,
     .defaultValue = 100.f,
@@ -175,7 +195,7 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "fxVignette",
     .binding = &shaderInjection.fxVignette,
     .defaultValue = 50.f,
-    .label = "fxVignette",
+    .label = "Vignette",
     .section = "Effects",
     .max = 100.f,
     .parse = [](float value) { return value * 0.02f; }
@@ -184,7 +204,7 @@ UserSettingUtil::UserSettings userSettings = {
     .key = "fxFilmGrain",
     .binding = &shaderInjection.fxFilmGrain,
     .defaultValue = 50.f,
-    .label = "fxFilmGrain",
+    .label = "FilmGrain",
     .section = "Effects",
     .max = 100.f,
     .parse = [](float value) { return value * 0.02f; }
@@ -198,12 +218,14 @@ static void onPresetOff() {
   UserSettingUtil::updateUserSetting("toneMapPeakNits", 203.f);
   UserSettingUtil::updateUserSetting("toneMapGameNits", 203.f);
   UserSettingUtil::updateUserSetting("toneMapUINits", 203.f);
+  UserSettingUtil::updateUserSetting("toneMapGammaCorrection", 0);
   UserSettingUtil::updateUserSetting("colorGradeExposure", 1.f);
   UserSettingUtil::updateUserSetting("colorGradeHighlights", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeShadows", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeContrast", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeSaturation", 50.f);
   UserSettingUtil::updateUserSetting("colorGradeLUTStrength", 100.f);
+  UserSettingUtil::updateUserSetting("colorGradeBlowout", 0.f);
   UserSettingUtil::updateUserSetting("fxBloom", 50.f);
   UserSettingUtil::updateUserSetting("fxVignette", 50.f);
   UserSettingUtil::updateUserSetting("fxFilmGrain", 50.f);

@@ -40,8 +40,9 @@ void main(
   float vanillaMidGray = 0.18f;
 
   float renoDRTContrast = 1.1f;
-  float renoDRTShadow = 0.f;
-  float renoDRTDechroma = 0.f;
+  float renoDRTFlare = 0.f;
+  float renoDRTShadows = 1.f;
+  float renoDRTDechroma = 0.5f;
   float renoDRTSaturation = 1.05f;
   float renoDRTHighlights = 1.f;
 
@@ -56,11 +57,13 @@ void main(
     injectedData.colorGradeContrast,
     injectedData.colorGradeSaturation,
     vanillaMidGray,
+    vanillaMidGray * 100.f,
+    renoDRTHighlights,
+    renoDRTShadows,
     renoDRTContrast,
-    renoDRTShadow,
-    renoDRTDechroma,
     renoDRTSaturation,
-    renoDRTHighlights
+    renoDRTDechroma,
+    renoDRTFlare
   };
   ToneMapLUTParams lutParams = {
     t1,

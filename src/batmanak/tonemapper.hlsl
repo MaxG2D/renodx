@@ -15,8 +15,9 @@ float3 applyUserToneMap(float3 untonemapped, Texture2D lutTexture, SamplerState 
   float vanillaMidGray = uncharted2Tonemap(0.18f) / uncharted2Tonemap(2.2f);
 
   float renoDRTContrast = 1.12f;
-  float renoDRTShadow = 0.0f;
-  float renoDRTDechroma = 0.0f;
+  float renoDRTFlare = 0.f;
+  float renoDRTShadows = 1.f;
+  float renoDRTDechroma = injectedData.colorGradeBlowout;
   float renoDRTSaturation = 1.05f;
   float renoDRTHighlights = 1.2f;
 
@@ -24,18 +25,20 @@ float3 applyUserToneMap(float3 untonemapped, Texture2D lutTexture, SamplerState 
     injectedData.toneMapType,
     injectedData.toneMapPeakNits,
     injectedData.toneMapGameNits,
-    0,
+    injectedData.toneMapGammaCorrection - 1,  // -1 == srgb
     injectedData.colorGradeExposure,
     injectedData.colorGradeHighlights,
     injectedData.colorGradeShadows,
     injectedData.colorGradeContrast,
     injectedData.colorGradeSaturation,
     vanillaMidGray,
+    vanillaMidGray * 100.f,
+    renoDRTHighlights,
+    renoDRTShadows,
     renoDRTContrast,
-    renoDRTShadow,
-    renoDRTDechroma,
     renoDRTSaturation,
-    renoDRTHighlights
+    renoDRTDechroma,
+    renoDRTFlare
   };
   ToneMapLUTParams lutParams = {
     lutTexture,
@@ -49,6 +52,10 @@ float3 applyUserToneMap(float3 untonemapped, Texture2D lutTexture, SamplerState 
   };
 
   outputColor = toneMap(untonemapped, tmParams, lutParams);
+
+  if (injectedData.toneMapGammaCorrection == 0.f) {
+    outputColor = gammaCorrectSafe(outputColor, true);
+  }
 
   return outputColor;
 }
