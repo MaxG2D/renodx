@@ -13,13 +13,14 @@
 #include <embed/0x8024E8B5.h> // Tonemapping
 #include <embed/0x80802E60.h> // LUT (YEETED COMPLETELY, TOO BAD!)
 #include <embed/0x0E30E611.h> // Specular, SunDirectionalLighting (BROKEN FOR NOW, NOT ALL SHADER VARIANTS REPLACED, TOO BAD!)
-#include <embed/0x7FE25E5A.h> // SunDisk (it's very dim in vanilla, can't really be changed with Creation Kit)
-#include <embed/0x2C49CF0C.h> // Removing Gamma Correction from menu item inspect screen - part 1
-#include <embed/0x58010595.h> // Removing Gamma Correction from menu item inspect screen - part 2
+#include <embed/0x7FE25E5A.h> // SunDisk (It's very dim in vanilla, can't really be changed with Creation Kit)
+//#include <embed/0x2C49CF0C.h> // Removing Gamma Correction from menu item inspect screen - part 1 (NOT NEEDED NOW THAT THE WHOLE UI IS GAMMA CORRECTED!)
+//#include <embed/0x58010595.h> // Removing Gamma Correction from menu item inspect screen - part 2 (NOT NEEDED NOW THAT THE WHOLE UI IS GAMMA CORRECTED!)
 #include <embed/0xBA5E7BEF.h> // Fix negative colors on on-screen blood effect
 //#include <embed/0x3E58E26F.h> // Loading (RGB) menu overlay
 //#include <embed/0x55825EE1.h> // ESC (A) menu overlay
 #include <embed/0xB74B05F4.h> // Clear before drawing menu overlay, I suspect it causes issues with swapchain upgrades?
+#include <embed/0xF9EC8EA4.h> // UI (Added gamma correction, otherwise it looks wrong in HDR)
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -40,12 +41,13 @@ ShaderReplaceMod::CustomShaders customShaders = {
   CustomShaderEntry(0x80802E60),
   CustomShaderEntry(0x0E30E611),
   CustomShaderEntry(0x7FE25E5A),
-  CustomShaderEntry(0x2C49CF0C),
-  CustomShaderEntry(0x58010595),
+  //CustomShaderEntry(0x2C49CF0C),
+  //CustomShaderEntry(0x58010595),
   CustomShaderEntry(0xBA5E7BEF),
   //CustomShaderEntry(0x3E58E26F),
   //CustomShaderEntry(0x55825EE1),
-  CustomShaderEntry(0xB74B05F4)
+  CustomShaderEntry(0xB74B05F4),
+  CustomShaderEntry(0xF9EC8EA4)
 };
 
 ShaderInjectData shaderInjection;
