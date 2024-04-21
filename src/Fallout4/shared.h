@@ -7,6 +7,10 @@ struct ShaderInjectData {
   float fxSpecularAmount;
   float fxSunDirectionalAmount;
   float fxSunDiskAmount;
+  float fxWaterSpecularAmount;
+  float fxWaterSpecularRoughness;
+  float fxWaterWavesHeight;
+  float fxWaterWavesScale;
 };
 
 #ifndef __cplusplus

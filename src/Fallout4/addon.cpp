@@ -21,6 +21,7 @@
 //#include <embed/0x55825EE1.h> // ESC (A) menu overlay
 #include <embed/0xB74B05F4.h> // Clear before drawing menu overlay, I suspect it causes issues with swapchain upgrades?
 #include <embed/0xF9EC8EA4.h> // UI (Added gamma correction, otherwise it looks wrong in HDR)
+#include <embed/0x510321A1.h> // Water (specular highlights are very dim in vanilla, to very realistic)
 
 #include <deps/imgui/imgui.h>
 #include <include/reshade.hpp>
@@ -47,7 +48,8 @@ ShaderReplaceMod::CustomShaders customShaders = {
   //CustomShaderEntry(0x3E58E26F),
   //CustomShaderEntry(0x55825EE1),
   CustomShaderEntry(0xB74B05F4),
-  CustomShaderEntry(0xF9EC8EA4)
+  CustomShaderEntry(0xF9EC8EA4),
+  CustomShaderEntry(0x510321A1)
 };
 
 ShaderInjectData shaderInjection;
@@ -59,7 +61,7 @@ UserSettingUtil::UserSettings userSettings = {
     .binding = &shaderInjection.fxSpecularAmount,
     .defaultValue = 1.f,
     .label = "SpecularAmount",
-    .section = "GameHDRValues",
+    .section = "GlobalHDRValues",
     .max = 100.f,
   },
     new UserSettingUtil::UserSetting {
@@ -67,7 +69,7 @@ UserSettingUtil::UserSettings userSettings = {
     .binding = &shaderInjection.fxSunDirectionalAmount,
     .defaultValue = 1.f,
     .label = "SunDirectionalAmount",
-    .section = "GameHDRValues",
+    .section = "GlobalHDRValues",
     .max = 100.f,
   },
       new UserSettingUtil::UserSetting {
@@ -75,9 +77,41 @@ UserSettingUtil::UserSettings userSettings = {
     .binding = &shaderInjection.fxSunDiskAmount,
     .defaultValue = 1.f,
     .label = "SunDiskAmount",
-    .section = "GameHDRValues",
+    .section = "GlobalHDRValues",
     .max = 100000.f,
-  }
+  },
+      new UserSettingUtil::UserSetting {
+    .key = "fxWaterSpecularAmount",
+    .binding = &shaderInjection.fxWaterSpecularAmount,
+    .defaultValue = 1.f,
+    .label = "WaterSpecularAmount",
+    .section = "Water",
+    .max = 100.f,
+  },
+      new UserSettingUtil::UserSetting {
+    .key = "fxWaterSpecularRoughness",
+    .binding = &shaderInjection.fxWaterSpecularRoughness,
+    .defaultValue = 1.f,
+    .label = "WaterSpecularRoughness",
+    .section = "Water",
+    .max = 10000.f,
+  },
+      new UserSettingUtil::UserSetting {
+    .key = "fxWaterWavesHeight",
+    .binding = &shaderInjection.fxWaterWavesHeight,
+    .defaultValue = 1.f,
+    .label = "WaterWavesHeight",
+    .section = "Water",
+    .max = 2.f,
+  },
+      new UserSettingUtil::UserSetting {
+    .key = "fxWaterWavesScale",
+    .binding = &shaderInjection.fxWaterWavesScale,
+    .defaultValue = 1.f,
+    .label = "WaterWavesScale",
+    .section = "Water",
+    .max = 2.f,
+  },
 };
 
 // clang-format on
