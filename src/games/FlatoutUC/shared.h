@@ -74,23 +74,14 @@ struct ShaderInjectData {
 
   float swap_chain_encoding;
   float swap_chain_encoding_color_space;
-  float Custom_Bloom;
-  float Custom_Star_Dispersion;
+  float Custom_Bloom_Amount;
+  float Custom_Bloom_Tint;
 
-  float Custom_Emissives_Intensity;
-  float Custom_Skybox_Intensity;
-  float Custom_Particles_Intensity;
-  float Custom_Sharpening_Amount;
+  float Custom_Color_Desaturation;
+  float Custom_Color_Contrast;
+  float Custom_Color_Levels;
+  float Padding;
 
-  float Custom_UI_Disable;
-  float Custom_UI_Menu_Blur_Intensity;
-  float Custom_Color_Tint_Intensity;
-  float Custom_Color_Tint2_Intensity;
-
-  float Custom_Contrast_Intensity;
-  float Custom_MotionBlur_Amount;
-  float Custom_MotionBlur_HDRBoost;
-  float Custom_BrightPass_Thresholding;
 };
 
 #ifndef __cplusplus
@@ -128,20 +119,11 @@ float4 shader_injection[11] : register(c50);
 #define RENODX_SWAP_CHAIN_CUSTOM_COLOR_SPACE   shader_injection[6][3]
 #define RENODX_SWAP_CHAIN_ENCODING             shader_injection[7][0]
 #define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE shader_injection[7][1]
-#define Custom_Bloom                           shader_injection[7][2]
-#define Custom_Star_Dispersion                 shader_injection[7][3]
-#define Custom_Emissives_Intensity             shader_injection[8][0]
-#define Custom_Skybox_Intensity                shader_injection[8][1]
-#define Custom_Particles_Intensity             shader_injection[8][2]
-#define Custom_Sharpening_Amount               shader_injection[8][3]
-#define Custom_UI_Disable                      shader_injection[9][0]
-#define Custom_UI_Menu_Blur_Intensity          shader_injection[9][1]
-#define Custom_Color_Tint_Intensity            shader_injection[9][2]
-#define Custom_Color_Tint2_Intensity           shader_injection[9][3]
-#define Custom_Contrast_Intensity              shader_injection[10][0]
-#define Custom_MotionBlur_Amount               shader_injection[10][1]
-#define Custom_MotionBlur_HDRBoost             shader_injection[10][2]
-#define Custom_BrightPass_Thresholding         shader_injection[10][3]
+#define Custom_Bloom_Amount                    shader_injection[7][2]
+#define Custom_Bloom_Tint                      shader_injection[7][3]
+#define Custom_Color_Desaturation              shader_injection[8][0]
+#define Custom_Color_Contrast                  shader_injection[8][1]
+#define Custom_Color_Levels                    shader_injection[8][2]
 
 
 #define RENODX_RENO_DRT_TONE_MAP_METHOD renodx::tonemap::renodrt::config::tone_map_method::REINHARD
@@ -184,20 +166,11 @@ cbuffer shader_injection : register(b13) {
 #define RENODX_SWAP_CHAIN_ENCODING             shader_injection.swap_chain_encoding
 #define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE shader_injection.swap_chain_encoding_color_space
 #define RENODX_RENO_DRT_TONE_MAP_METHOD        renodx::tonemap::renodrt::config::tone_map_method::REINHARD
-#define Custom_Bloom                           shader_injection.Custom_Bloom
-#define Custom_Star_Dispersion                 shader_injection.Custom_Star_Dispersion
-#define Custom_Emissives_Intensity             shader_injection.Custom_Emissives_Intensity
-#define Custom_Skybox_Intensity                shader_injection.Custom_Skybox_Intensity
-#define Custom_Particles_Intensity             shader_injection.Custom_Particles_Intensity
-#define Custom_Sharpening_Amount               shader_injection.Custom_Sharpening_Amount
-#define Custom_UI_Disable                      shader_injection.Custom_UI_Disable
-#define Custom_UI_Menu_Blur_Intensity          shader_injection.Custom_UI_Menu_Blur_Intensity
-#define Custom_Color_Tint_Intensity            shader_injection.Custom_Color_Tint_Intensity
-#define Custom_Color_Tint2_Intensity           shader_injection.Custom_Color_Tint_Intensity
-#define Custom_Contrast_Intensity              shader_injection.Custom_Contrast_Intensity
-#define Custom_MotionBlur_Amount               shader_injection.Custom_MotionBlur_Amount
-#define Custom_MotionBlur_HDRBoost             shader_injection.Custom_MotionBlur_HDRBoost
-#define Custom_BrightPass_Thresholding         shader_injection.Custom_BrightPass_Thresholding
+#define Custom_Bloom_Amount                    shader_injection.Custom_Bloom_Amount
+#define Custom_Bloom_Tint                      shader_injection.Custom_Bloom_Tint
+#define Custom_Color_Desaturation              shader_injection.Custom_Color_Desaturation
+#define Custom_Color_Contrast                  shader_injection.Custom_Color_Contrast
+#define Custom_Color_Levels                    shader_injection.Custom_Color_Levels
 
 #endif
 

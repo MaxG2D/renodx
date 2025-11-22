@@ -4,7 +4,7 @@
 sampler2D TextureBase     : register(s0); // s0: Main Render
 sampler2D TextureBloom    : register(s1); // s1: Bloom Buffer
 sampler2D TextureGrading  : register(s2); // s2: 1D Color Grading LUT
-sampler2D TextureVignette : register(s3); // s3: Vignette/Global Weight
+sampler2D TextureExposure : register(s3); // s3: Exposure Weight
 sampler2D TextureBleach   : register(s4); // s4: Bleach Bypass Ramp
 sampler2D TextureOverlay  : register(s5); // s5: Overlay/Dirt Layer
 
@@ -20,26 +20,25 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : COLOR
 {
-    // Constants
-    const float3 LUMA_WEIGHTS = float3(0.2125f, 0.7154f, 0.0721f);
+  // Constants
+    const float3 LUMA_WEIGHTS = float3(0.2126f, 0.7152f, 0.0722f);
     const float  LUT_OFFSET   = 0.00048828125f;
-    const float  LUT_V_COORD  = 0.03125f;
-    const float  EPSILON      = 9.99999975e-005;
+    const float LUT_V_COORD = 0.03125f;
+    const float EPSILON = 1e-7;
 
     // 1. Texture Composition
     // ----------------------
     float4 o            = float4(0, 0, 0, 1);
     float4 baseColor    = tex2D(TextureBase, input.uv);
     float4 overlayColor = tex2D(TextureOverlay, input.uv);
-    float4 vignette     = tex2D(TextureVignette, float2(LUT_V_COORD, 0.0f));
+    float4 exposure     = tex2D(TextureExposure, float2(LUT_V_COORD, 0.0f));
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
     // Combine Base and Overlay
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
 
-    // Apply Vignette/Global Weighting
-    float3 combinedRGB;
-    combinedRGB = composition * vignette.x;
+    // Apply Exposure Weighting
+    float3 combinedRGB = composition * exposure.x;
 
     // 2. Color Grading (LUT Lookup)
     // -----------------------------
@@ -58,14 +57,12 @@ float4 main(PS_INPUT input) : COLOR
     // Apply Gamma/Curve Power to the LUT result
     gradedColor = pow(gradedColor, g_CurveParams.x);
 
-    float gradedColor_Y = dot(gradedColor, LUMA_WEIGHTS);
-
     // 3. Add Bloom
     // ------------
     float3 colorWithBloom;
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      colorWithBloom = saturate(bloomColor.rgb * g_BloomTint.rgb) + gradedColor;
+      colorWithBloom = (bloomColor.rgb * Custom_Bloom_Amount) * (g_BloomTint.rgb * Custom_Bloom_Tint) + gradedColor;
     } else {
       colorWithBloom = saturate(bloomColor.rgb * g_BloomTint.rgb + gradedColor);
     }
@@ -77,15 +74,24 @@ float4 main(PS_INPUT input) : COLOR
     float luma = dot(preBleach, LUMA_WEIGHTS);
     // Sample Bleach Ramp based on Luma
     float3 bleachSample = tex2D(TextureBleach, float2(luma, LUT_V_COORD)).rgb;
-    float3 bleachResult = lerp(preBleach, bleachSample, g_BleachParams.y);
-
+    float3 bleachResult;
+    if (RENODX_TONE_MAP_TYPE > 0.f) {
+      bleachResult = lerp(preBleach, bleachSample, g_BleachParams.y * Custom_Color_Desaturation);
+    } else {
+      bleachResult = lerp(preBleach, bleachSample, g_BleachParams.y);
+    }
     // 5. Dynamic Contrast / Luma Correction
     // -------------------------------------
-    float contrastNum = max((luma - 0.5f) * g_BleachParams.x + 0.5f, 0.f);
+    float contrastNum = (luma - 0.5f) * g_BleachParams.x + 0.5f;
 
     // Scale = ContrastNum / (Luma + Epsilon)
-    float contrastScale = contrastNum / (luma + EPSILON); 
-    float3 contrastColor = max(bleachResult * contrastScale, 0.f);
+    float contrastScale = contrastNum / (luma + EPSILON);
+    float3 contrastColor;
+    if (RENODX_TONE_MAP_TYPE > 0.f) {
+      contrastColor = max(bleachResult * contrastScale * Custom_Color_Contrast, 0.f);
+    } else {
+      contrastColor = saturate(bleachResult * contrastScale);
+    }
 
     // 6. Final Levels & Post-Curve
     // ----------------------------
@@ -100,7 +106,12 @@ float4 main(PS_INPUT input) : COLOR
     float3 levelsScale = (levelsDiff >= 0.0f) ? g_Levels.z : g_Levels.x;
 
     // Final Output
-    float3 finalcolor = levelsDiff * levelsScale + 0.5f;
+    float3 finalcolor;
+    if (RENODX_TONE_MAP_TYPE > 0.f) {
+      finalcolor = levelsDiff * (levelsScale * Custom_Color_Levels) + 0.5f;
+    } else {
+      finalcolor = levelsDiff * (levelsScale) + 0.5f;
+    }
 
 
     // LUT for already fully post processed HDR
@@ -109,6 +120,8 @@ float4 main(PS_INPUT input) : COLOR
     gradedColorLinear.r = tex2D(TextureGrading, float2(lutUVLinear.r, LUT_V_COORD)).r;
     gradedColorLinear.g = tex2D(TextureGrading, float2(lutUVLinear.g, LUT_V_COORD)).r;
     gradedColorLinear.b = tex2D(TextureGrading, float2(lutUVLinear.b, LUT_V_COORD)).r;
+
+    gradedColorLinear = pow(gradedColorLinear, g_CurveParams.x);
 
     float3 finalcolorSDR = saturate(gradedColorLinear);
     float3 finalcolorSDRVanilla = saturate(finalcolor);
