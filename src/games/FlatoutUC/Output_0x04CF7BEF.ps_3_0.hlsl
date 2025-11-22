@@ -34,10 +34,10 @@ float4 main(PS_INPUT input) : COLOR
     float4 vignette     = tex2D(TextureVignette, float2(LUT_V_COORD, 0.0f));
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
+    // Combine Base and Overlay (Standard RGB mix)
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
 
     // Apply Vignette/Global Weighting
-    // float3 combinedRGB = composition * vignette.x;
     float3 combinedRGB;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       combinedRGB = composition * vignette.x + (bloomColor.rgb * g_BloomTint.rgb);
@@ -61,62 +61,57 @@ float4 main(PS_INPUT input) : COLOR
 
     // 3. Add Bloom
     // ------------
-    // float3 colorWithBloom = (bloomColor.rgb * g_BloomTint.rgb + gradedColor);
     float3 colorWithBloom;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      colorWithBloom = gradedColor;
+      colorWithBloom = combinedRGB;
     } else {
       colorWithBloom = saturate(bloomColor.rgb * g_BloomTint.rgb + gradedColor);
     }
-    //float3 colorWithBloom = gradedColor;
 
     // 4. Bleach Bypass & Saturation
     // -----------------------------
     // Pre-Bleach Gamma/Curve
     float3 preBleach = pow(colorWithBloom, g_BleachParams.z);
-
-    // Calculate Luminance
     float luma = dot(preBleach, LUMA_WEIGHTS);
-
     // Sample Bleach Ramp based on Luma
     float3 bleachSample = tex2D(TextureBleach, float2(luma, LUT_V_COORD)).rgb;
-
-    // Lerp between original and bleach sample (Bleach Mix)
     float3 bleachResult = lerp(preBleach, bleachSample, g_BleachParams.y);
 
     // 5. Dynamic Contrast / Luma Correction
     // -------------------------------------
-    // Standard Contrast Formula: (Value - 0.5) * Contrast + 0.5
-    // Logic: ScaleColor = BleachResult * (ContrastLuma / OriginalLuma)
+    float contrastNum = max((luma - 0.5f) * g_BleachParams.x + 0.5f, 0.f);
 
-    float contrastLuma = ((luma - 0.5f) * g_BleachParams.x);
-    float contrastScale = saturate(contrastLuma / (luma + EPSILON)); 
-
-    float3 contrastColor = (bleachResult * (contrastScale + 1.0));
+    // Scale = ContrastNum / (Luma + Epsilon)
+    float contrastScale = contrastNum / (luma + EPSILON); 
+    float3 contrastColor = max(bleachResult * contrastScale, 0.f);
 
     // 6. Final Levels & Post-Curve
     // ----------------------------
     // Post-Contrast Gamma
-    float3 postCurve = pow(contrastColor, g_BleachParams.w);
+    float3 postCurveLog = log2(contrastColor);
+    float3 postCurveExp = postCurveLog * g_BleachParams.w;
+    float3 postCurve = exp2(postCurveExp);
 
-    // Levels Adjustment (Input Range Remapping)
+    // Levels Adjustment
     // (Val - InMin) * Scale + 0.5
     float3 levelsDiff = postCurve - g_Levels.y;
     float3 levelsScale = (levelsDiff >= 0.0f) ? g_Levels.z : g_Levels.x;
 
-
+    // Final Output
     float3 finalcolor = levelsDiff * levelsScale + 0.5f;
     float3 finalcolorSDR = saturate(finalcolor);
 
-    float4 untonemapped_sRGB = float4(max(0, combinedRGB.rgb), baseColor.a);
-    float4 untonemapped = renodx::color::srgba::Decode(untonemapped_sRGB);
+    float3 untonemapped_gamma = max(0, finalcolor.rgb);
+    float3 untonemapped = renodx::color::gamma::Decode(untonemapped_gamma, 2.2);
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped.rgb);
-    float4 tonemapped_sRGB = renodx::color::srgba::Encode(float4(tonemapped.rgb, 1));
+    float3 tonemapped_gamma = renodx::color::gamma::Encode(tonemapped.rgb, 2.2);
+    float3 graded = renodx::lut::RecolorUnclamped(finalcolor.rgb, gradedColor, RENODX_COLOR_GRADE_STRENGTH);
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      o.rgb = renodx::draw::ToneMapPass(untonemapped_sRGB.xyz, tonemapped_sRGB.xyz);
+      o.rgb = renodx::draw::ToneMapPass(untonemapped_gamma.xyz, tonemapped_gamma.xyz);
     } else {
       o.rgb = finalcolorSDR.xyz;
+      //o.rgb = renodx::color::gamma::Decode(o.rgb, 2.2);
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);
