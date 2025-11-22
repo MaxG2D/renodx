@@ -34,36 +34,38 @@ float4 main(PS_INPUT input) : COLOR
     float4 vignette     = tex2D(TextureVignette, float2(LUT_V_COORD, 0.0f));
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
-    // Combine Base and Overlay (Standard RGB mix)
+    // Combine Base and Overlay
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
 
     // Apply Vignette/Global Weighting
     float3 combinedRGB;
-    if (RENODX_TONE_MAP_TYPE > 0.f) {
-      combinedRGB = composition * vignette.x + (bloomColor.rgb * g_BloomTint.rgb);
-    } else {
-      combinedRGB = composition * vignette.x;
-    }
+    combinedRGB = composition * vignette.x;
 
     // 2. Color Grading (LUT Lookup)
     // -----------------------------
     // Transform RGB values to UV coordinates for the LUT
     float3 lutUV = combinedRGB * g_CurveParams.y + LUT_OFFSET;
 
-    // Sample LUT.
+    // Sample LUT, but for now only for "vanilla" tonemapping option, because LUT clamps to SDR, and we want to keep color unclamped.
     float3 gradedColor;
-    gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
-    gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
-    gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
-
+    if (RENODX_TONE_MAP_TYPE > 0.f) {
+      gradedColor = combinedRGB;
+    } else {
+      gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
+      gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
+      gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
+    }
     // Apply Gamma/Curve Power to the LUT result
     gradedColor = pow(gradedColor, g_CurveParams.x);
+
+    float gradedColor_Y = dot(gradedColor, LUMA_WEIGHTS);
 
     // 3. Add Bloom
     // ------------
     float3 colorWithBloom;
+
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      colorWithBloom = combinedRGB;
+      colorWithBloom = saturate(bloomColor.rgb * g_BloomTint.rgb) + gradedColor;
     } else {
       colorWithBloom = saturate(bloomColor.rgb * g_BloomTint.rgb + gradedColor);
     }
@@ -99,19 +101,26 @@ float4 main(PS_INPUT input) : COLOR
 
     // Final Output
     float3 finalcolor = levelsDiff * levelsScale + 0.5f;
-    float3 finalcolorSDR = saturate(finalcolor);
+
+
+    // LUT for already fully post processed HDR
+    float3 lutUVLinear = finalcolor * g_CurveParams.y + LUT_OFFSET;
+    float3 gradedColorLinear;
+    gradedColorLinear.r = tex2D(TextureGrading, float2(lutUVLinear.r, LUT_V_COORD)).r;
+    gradedColorLinear.g = tex2D(TextureGrading, float2(lutUVLinear.g, LUT_V_COORD)).r;
+    gradedColorLinear.b = tex2D(TextureGrading, float2(lutUVLinear.b, LUT_V_COORD)).r;
+
+    float3 finalcolorSDR = saturate(gradedColorLinear);
+    float3 finalcolorSDRVanilla = saturate(finalcolor);
 
     float3 untonemapped_gamma = max(0, finalcolor.rgb);
-    float3 untonemapped = renodx::color::gamma::Decode(untonemapped_gamma, 2.2);
-    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped.rgb);
-    float3 tonemapped_gamma = renodx::color::gamma::Encode(tonemapped.rgb, 2.2);
-    float3 graded = renodx::lut::RecolorUnclamped(finalcolor.rgb, gradedColor, RENODX_COLOR_GRADE_STRENGTH);
+    float3 untonemapped = renodx::color::srgb::Decode(untonemapped_gamma);
+    float3 untonemapped_encoded = renodx::color::srgb::Encode(untonemapped);
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      o.rgb = renodx::draw::ToneMapPass(untonemapped_gamma.xyz, tonemapped_gamma.xyz);
+      o.rgb = renodx::draw::ToneMapPass(untonemapped_gamma, finalcolorSDR);
     } else {
-      o.rgb = finalcolorSDR.xyz;
-      //o.rgb = renodx::color::gamma::Decode(o.rgb, 2.2);
+      o.rgb = finalcolorSDRVanilla.xyz;
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);
