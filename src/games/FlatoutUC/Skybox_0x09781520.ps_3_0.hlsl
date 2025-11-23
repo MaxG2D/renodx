@@ -23,7 +23,7 @@ float4 main(PS_INPUT input) : COLOR
     r0.x = saturate(r0.x * g_PS_fogFarVariables.y);
     r1 = tex2D(Tex0, input.texcoord);
     r0.yzw = r1.xyz * g_PS_skyDomeColor.x + g_PS_skyDomeColor.z;
-    if (Custom_Skybox_EnableBoost > 0) {
+    if (Custom_Skybox_EnableBoost > 0 && RENODX_TONE_MAP_TYPE > 0.f) {
         float skyboxLuma = pow(dot(r0.yzw, lumaWeights), 1.5);
         float3 skyboxChroma = r0.yzw + (r0.yzw - skyboxLuma);
         float3 skyboxChromaDir = skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation;

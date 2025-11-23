@@ -20,7 +20,9 @@ float4 main(PS_INPUT input) : COLOR
     // It sums samples from index 0 to 14.
     for (int i = 0; i < 15; i++)
     {
-        g_avSampleOffsets[i] *= Custom_Bloom_BlurSize;
+        if (RENODX_TONE_MAP_TYPE > 0.f) {
+          g_avSampleOffsets[i] *= Custom_Bloom_BlurSize;
+        }
         float2 sampleUV = input.texcoord + g_avSampleOffsets[i].xy;
         float4 colorSample = tex2D(s0, sampleUV);
         finalColor += colorSample * g_avSampleWeights[i];

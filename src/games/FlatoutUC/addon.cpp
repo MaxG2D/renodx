@@ -484,7 +484,7 @@ renodx::utils::settings::Settings settings = {
     .on_change = []() {
         renodx::utils::settings::UpdateSetting("toneMapType", 0.f);
         renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
-        renodx::utils::settings::UpdateSetting("SwapChainGammaCorrection", 0.f);
+        renodx::utils::settings::UpdateSetting("SwapChainGammaCorrection", 1);
         renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
         renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -500,7 +500,7 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f); },
@@ -514,7 +514,7 @@ renodx::utils::settings::Settings settings = {
     .on_change = []() {
         renodx::utils::settings::UpdateSetting("toneMapType", 0.f);
         renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
-        renodx::utils::settings::UpdateSetting("SwapChainGammaCorrection", 0.f);
+        renodx::utils::settings::UpdateSetting("SwapChainGammaCorrection", 1);
         renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
         renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -530,7 +530,7 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 80.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 58.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f); },
@@ -558,7 +558,7 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
      renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
      renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 1);
-     renodx::utils::settings::UpdateSetting("SwapChainGammaCorrection", 1.f);
+     renodx::utils::settings::UpdateSetting("SwapChainGammaCorrection", 1);
      renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
      renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
      renodx::utils::settings::UpdateSetting("colorGradeShadows", 50.f);
@@ -574,7 +574,7 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
      renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f);   
