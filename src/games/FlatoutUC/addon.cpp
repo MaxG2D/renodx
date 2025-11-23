@@ -434,6 +434,48 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "FxSkyboxEnableBoost",
+        .binding = &shader_injection.Custom_Skybox_EnableBoost,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 0.f,
+        .label = "Enable Skybox Boost",
+        .section = "Effects",
+        .tooltip = "Enables HDR boost for skybox rendering.",
+        .labels = {"Disable Skybox Boost", "Enable Skybox Boost"},
+        .max = 1.f,
+        .parse = [](float value) { return value; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxSkyboxIntensity",
+        .binding = &shader_injection.Custom_Skybox_Intensity,
+        .default_value = 100.f,
+        .label = "Skybox Boost Intensity",
+        .section = "Effects",
+        .tooltip = "Skybox HDR boost intensity multiplier.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxSkyboxSaturation",
+        .binding = &shader_injection.Custom_Skybox_Saturation,
+        .default_value = 100.f,
+        .label = "Skybox Boost Saturation",
+        .section = "Effects",
+        .tooltip = "Skybox HDR boost saturation multiplier.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxSkyboxCurve",
+        .binding = &shader_injection.Custom_Skybox_Curve,
+        .default_value = 35.f,
+        .label = "Skybox Luminance-Chrominance curve",
+        .section = "Effects",
+        .tooltip = "Skybox luminance-chrominance curve adjustment. Lower value boost luma more, higher value boost chroma more.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
     .label = "Reset",
     .section = "Color Grading Templates",
@@ -457,7 +499,11 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); },
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f); },
     },
     new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
@@ -477,13 +523,17 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomThreshold", 75.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 100.f);
-        renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
+        renodx::utils::settings::UpdateSetting("FxBloomAmount", 25.f);
         renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 25.f);
+        renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 75.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 60.f);},
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 100.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f); },
     },
 };
 
@@ -523,7 +573,11 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
-     renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);   
+     renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f);   
 }
 
 const auto UPGRADE_TYPE_NONE = 0.f;
@@ -547,13 +601,13 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
         // while (!IsDebuggerPresent()) Sleep(100);
 
         renodx::mods::shader::force_pipeline_cloning = true;
-        renodx::mods::shader::expected_constant_buffer_space = 50;
+        renodx::mods::shader::expected_constant_buffer_space = 150;
         renodx::mods::shader::expected_constant_buffer_index = 13;
         renodx::mods::shader::allow_multiple_push_constants = true;
-        renodx::mods::shader::constant_buffer_offset = 50 * 4;
+        renodx::mods::shader::constant_buffer_offset = 150 * 4;
 
         renodx::mods::swapchain::expected_constant_buffer_index = 13;
-        renodx::mods::swapchain::expected_constant_buffer_space = 50;
+        renodx::mods::swapchain::expected_constant_buffer_space = 150;
         // renodx::mods::swapchain::target_format = reshade::api::format::b8g8r8a8_unorm;
         // renodx::mods::swapchain::target_color_space = reshade::api::color_space::srgb_nonlinear;
         renodx::mods::swapchain::prevent_full_screen = false;

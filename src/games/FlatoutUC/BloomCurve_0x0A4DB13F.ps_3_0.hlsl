@@ -2,7 +2,7 @@
 
 // Bloom brightpass threshold
 sampler2D SceneTexture : register(s0);
-sampler2D TintTexture  : register(s1); // (1x1 or LUT sample)
+sampler2D ExposureTexture  : register(s1); // (1x1 or LUT sample)
 
 // Bloom Curve Parameters:
 // x: Threshold
@@ -24,12 +24,12 @@ float4 main(PS_INPUT input) : COLOR
 
     // 1. Sample Textures
     // Sample the tint/exposure factor from the second texture (1D lookup)
-    float4 tintSample = tex2D(TintTexture, float2(TINT_UV_X, 0.0f));  
+    float4 exposureSample = tex2D(ExposureTexture, float2(TINT_UV_X, 0.0f));  
     // Sample the main scene color
     float4 sceneColor = tex2D(SceneTexture, input.texcoord);
 
     // 2. Apply Tint
-    float3 tintedColor = sceneColor.rgb * tintSample.r;
+    float3 tintedColor = sceneColor.rgb * exposureSample.r;
 
     // 3. Calculate Luminance
     // Using a uniform weight (0.333) approximation + epsilon to prevent div-by-zero
