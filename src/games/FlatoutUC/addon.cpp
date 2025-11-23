@@ -324,7 +324,7 @@ renodx::utils::settings::Settings settings = {
         .key = "SwapChainGammaCorrection",
         .binding = &shader_injection.swap_chain_gamma_correction,
         .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 0.f,
+        .default_value = 1.f,
         .label = "Gamma Correction",
         .section = "Display Output",
         .labels = {"None", "2.2", "2.4"},
@@ -496,7 +496,7 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
+        renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); 
@@ -528,8 +528,8 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 100.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 100.f);
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 80.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 58.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
