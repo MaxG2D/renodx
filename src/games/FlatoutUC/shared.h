@@ -80,7 +80,12 @@ struct ShaderInjectData {
   float Custom_Color_Desaturation;
   float Custom_Color_Contrast;
   float Custom_Color_Levels;
-  float Padding;
+  float Custom_Particles_Glow;
+
+  float Custom_Particles_Glow_Contrast;
+  float Custom_Bloom_Threshold;
+  float Custom_Bloom_BlurSize;
+  float padding3;
 
 };
 
@@ -124,6 +129,10 @@ float4 shader_injection[11] : register(c50);
 #define Custom_Color_Desaturation              shader_injection[8][0]
 #define Custom_Color_Contrast                  shader_injection[8][1]
 #define Custom_Color_Levels                    shader_injection[8][2]
+#define Custom_Particles_Glow                  shader_injection[8][3]
+#define Custom_Particles_Glow_Contrast         shader_injection[9][0]
+#define Custom_Bloom_Threshold                 shader_injection[9][1]
+#define Custom_Bloom_BlurSize                  shader_injection[9][2]
 
 
 #define RENODX_RENO_DRT_TONE_MAP_METHOD renodx::tonemap::renodrt::config::tone_map_method::REINHARD
@@ -171,6 +180,10 @@ cbuffer shader_injection : register(b13) {
 #define Custom_Color_Desaturation              shader_injection.Custom_Color_Desaturation
 #define Custom_Color_Contrast                  shader_injection.Custom_Color_Contrast
 #define Custom_Color_Levels                    shader_injection.Custom_Color_Levels
+#define Custom_Particles_Glow                  shader_injection.Custom_Particles_Glow
+#define Custom_Particles_Glow_Contrast         shader_injection.Custom_Particles_Glow_Contrast
+#define Custom_Bloom_Threshold                 shader_injection.Custom_Bloom_Threshold
+#define Custom_Bloom_BlurSize                  shader_injection.Custom_Bloom_BlurSize
 
 #endif
 

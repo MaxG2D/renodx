@@ -344,6 +344,26 @@ renodx::utils::settings::Settings settings = {
         .is_visible = []() { return current_settings_mode >= 2; },
     },
     new renodx::utils::settings::Setting{
+        .key = "FxBloomThreshold",
+        .binding = &shader_injection.Custom_Bloom_Threshold,
+        .default_value = 50.f,
+        .label = "Bloom Brightpass Threshold",
+        .section = "Effects",
+        .tooltip = "Bloom brightpass threshold. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxBloomBlurSize",
+        .binding = &shader_injection.Custom_Bloom_BlurSize,
+        .default_value = 50.f,
+        .label = "Bloom Blur Size",
+        .section = "Effects",
+        .tooltip = "Bloom blur size. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "FxBloomAmount",
         .binding = &shader_injection.Custom_Bloom_Amount,
         .default_value = 50.f,
@@ -394,6 +414,26 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "FxParticlesGlow",
+        .binding = &shader_injection.Custom_Particles_Glow,
+        .default_value = 50.f,
+        .label = "Particles Glow Intensity",
+        .section = "Effects",
+        .tooltip = "Particles glow intensity. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxParticlesGlowContrast",
+        .binding = &shader_injection.Custom_Particles_Glow_Contrast,
+        .default_value = 50.f,
+        .label = "Particles Glow Contrast",
+        .section = "Effects",
+        .tooltip = "Particles glow contrast. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
     .label = "Reset",
     .section = "Color Grading Templates",
@@ -409,11 +449,15 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+        renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
+        renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); },
+        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); },
     },
     new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
@@ -431,11 +475,15 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
-        renodx::utils::settings::UpdateSetting("FxBloomAmount", 0.f);
+        renodx::utils::settings::UpdateSetting("FxBloomThreshold", 75.f);
+        renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 100.f);
+        renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 25.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
-        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); },
+        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 75.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 60.f);},
     },
 };
 
@@ -467,11 +515,15 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
      renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
      renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+     renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
+     renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
      renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
-     renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);   
+     renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
+     renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
+     renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);   
 }
 
 const auto UPGRADE_TYPE_NONE = 0.f;

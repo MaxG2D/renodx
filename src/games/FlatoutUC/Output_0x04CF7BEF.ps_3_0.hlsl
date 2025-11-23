@@ -1,7 +1,3 @@
-//
-// Optimized & Readable Post-Processing Shader
-// Refactored from legacy ASM logic
-//
 #include "./shared.h"
 
 // Output shader
@@ -25,7 +21,6 @@ struct PS_INPUT
 float4 main(PS_INPUT input) : COLOR
 {
     // Constants
-    // Using BT.709 Luma Weights (standard for this pipeline)
     const float3 LUMA_WEIGHTS = float3(0.2126f, 0.7152f, 0.0722f); 
     const float  LUT_OFFSET   = 0.00048828125f;
     const float  LUT_V_COORD  = 0.03125f;
@@ -46,45 +41,10 @@ float4 main(PS_INPUT input) : COLOR
     float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
     float originalLuma = dot(exposuremultipliedLinearColor, LUMA_WEIGHTS);
 
-    // 2. Color Grading (Luminance-Preserving LUT Lookup)
+    // 2. Color Grading
     // --------------------------------------------------
     float3 gradedColor = exposuremultipliedLinearColor;
     float3 lutUV = exposuremultipliedLinearColor * g_CurveParams.y + LUT_OFFSET;
-    /*
-        if (RENODX_TONE_MAP_TYPE > 0.f) {
-        
-        // FIX 1: Apply LUT in HDR path to match SDR colors, but preserve Luminance
-        // to prevent the LUT from clamping/darkening the HDR range.
-        float3 gradedColorRaw;
-        gradedColorRaw.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
-        gradedColorRaw.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
-        gradedColorRaw.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
-        float gradedColorRawLuma = dot(gradedColorRaw, LUMA_WEIGHTS);
-
-        // Apply the Color of the LUT, but scale it to match the Input Luminance
-        if (gradedColorRawLuma > EPSILON) {
-          gradedColor = gradedColorRaw * (originalLuma / gradedColorRawLuma);
-          gradedColor = pow(gradedColorRaw, g_CurveParams.x);
-        } else {
-          gradedColor = exposuremultipliedLinearColor;
-          gradedColor = pow(gradedColor, g_CurveParams.x);
-        }
-
-          //
-          //  gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
-          //  gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
-          //  gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
-          //
-        } else {
-            // SDR Path: Direct LUT application
-            gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
-            gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
-            gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
-            // Apply Gamma/Curve Power to the LUT result
-            gradedColor = pow(gradedColor, g_CurveParams.x);
-        }
-    */
-
     if (RENODX_TONE_MAP_TYPE <= 0.f) {
           gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
           gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
@@ -106,7 +66,7 @@ float4 main(PS_INPUT input) : COLOR
       colorWithBloom = saturate(bloomAdjusted + GammaColor);
     }
 
-    // 4. Bleach Bypass & Saturation
+    // 4. Bleach (Desaturation)
     // -----------------------------
     float3 preBleach = pow(colorWithBloom, g_BleachParams.z);
     float luma = dot(preBleach, LUMA_WEIGHTS);
@@ -120,25 +80,20 @@ float4 main(PS_INPUT input) : COLOR
       bleachResult = lerp(preBleach, bleachSample, g_BleachParams.y);
     }
 
-    // 5. Dynamic Contrast / Luma Correction (HDR Fix)
+    // 5. Contrast
     // -----------------------------------------------
     // Calculation: (Luma - 0.5) * Contrast + 0.5
     float contrastNum = (luma - 0.5f) * g_BleachParams.x + 0.5f;
-
-    // FIX 2: In SDR, contrastNum is hard-clamped to 1.0. In HDR, we must replicate this 
-    // behavior for the 0-1 range to match brightness (fixing the "Too Bright" issue).
-    // We soft-clamp contrastNum to not exceed the input luma itself for highlights > 1.0.
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-        contrastNum = min(contrastNum, max(1.0f, luma));
+        contrastNum = max(contrastNum, 0.f);
     } else {
         contrastNum = saturate(contrastNum);
     }
 
-    float contrastScale = contrastNum / (luma + EPSILON);
+    float contrastScale = max(contrastNum / (luma + EPSILON), 0.f);
     
     float3 contrastColor;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      // Apply Custom_Color_Contrast as a multiplier (default 1.0 should now match SDR)
       contrastColor = lerp(bleachResult, max(bleachResult * contrastScale * Custom_Color_Contrast, 0.f), clamp(Custom_Color_Contrast, 0.f, 1.f)); 
     } else {
       contrastColor = saturate(bleachResult * contrastScale);
@@ -156,8 +111,7 @@ float4 main(PS_INPUT input) : COLOR
         levelsDiff = postCurve - (g_Levels.y * Custom_Color_Levels);
     } else {
         levelsDiff = postCurve - g_Levels.y;
-    }
-    
+    }   
     float3 levelsScale = (levelsDiff >= 0.0f) ? g_Levels.z : g_Levels.x;
     
     float3 prefinalcolor;
@@ -174,10 +128,11 @@ float4 main(PS_INPUT input) : COLOR
     unclampedgradedColor.r = tex2D(TextureGrading, float2(unclampedlutUV.r, LUT_V_COORD)).r;
     unclampedgradedColor.g = tex2D(TextureGrading, float2(unclampedlutUV.g, LUT_V_COORD)).r;
     unclampedgradedColor.b = tex2D(TextureGrading, float2(unclampedlutUV.b, LUT_V_COORD)).r;
-    //unclampedgradedColor = pow(unclampedgradedColor, 1 / g_CurveParams.x);
+    // unclampedgradedColor = pow(unclampedgradedColor, 1 / g_CurveParams.x);
+    //unclampedgradedColor = saturate(unclampedgradedColor);
 
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
-    float3 untonemappedGameGamma = pow(prefinalcolor, 1 / g_CurveParams.x);
+    float3 untonemappedGameGamma = (prefinalcolor * unclampedgradedColor);
     float3 untonemapped = max(0, prefinalcolor.rgb);
     float3 untonemapped_Decode = renodx::color::srgb::Decode(untonemapped);
     float3 untonemapped_Encode = renodx::color::srgb::Encode(untonemapped);
@@ -186,7 +141,7 @@ float4 main(PS_INPUT input) : COLOR
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      o.rgb = renodx::draw::ToneMapPass(untonemapped, unclampedgradedColor);
+      o.rgb = renodx::draw::ToneMapPass(untonemapped, unclampedgradedColor, tonemapped);
     } else {
       o.rgb = finalcolorSDRVanilla.xyz;
     }
