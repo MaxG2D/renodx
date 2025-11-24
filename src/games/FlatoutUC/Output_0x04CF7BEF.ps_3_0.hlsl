@@ -85,7 +85,7 @@ float4 main(PS_INPUT input) : COLOR
     // Calculation: (Luma - 0.5) * Contrast + 0.5
     float contrastNum;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-        luma = saturate(pow(luma, 1 / 2.2));
+        luma = saturate(luma);
         contrastNum = (luma - 0.5f) * g_BleachParams.x + 0.5f;
         contrastNum = max(contrastNum, 0.f);
     } else {
@@ -121,30 +121,35 @@ float4 main(PS_INPUT input) : COLOR
     float3 prefinalcolor;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       prefinalcolor = levelsDiff * (levelsScale * Custom_Color_Levels) + 0.5f;
+      //prefinalcolor = pow(prefinalcolor, g_CurveParams.x);
     } else {
       prefinalcolor = levelsDiff * (levelsScale) + 0.5f;
     }
 
     // 7. Final Output
     // ---------------
-    float3 unclampedgradedColor = prefinalcolor;
+    float3 unclampedgradedColor = pow(prefinalcolor, 1/g_CurveParams.x);
     float3 unclampedlutUV = unclampedgradedColor * g_CurveParams.y + LUT_OFFSET;
     unclampedgradedColor.r = tex2D(TextureGrading, float2(unclampedlutUV.r, LUT_V_COORD)).r;
     unclampedgradedColor.g = tex2D(TextureGrading, float2(unclampedlutUV.g, LUT_V_COORD)).r;
     unclampedgradedColor.b = tex2D(TextureGrading, float2(unclampedlutUV.b, LUT_V_COORD)).r;
-    float3 finalcolorSDR = saturate(unclampedgradedColor);
+    float3 finalcolorSDR = saturate(pow(unclampedgradedColor, g_CurveParams.x));
+    //finalcolorSDR = saturate(pow(finalcolorSDR,  1 / g_CurveParams.x));
+    //float3 finalcolorSDR_GammaCorrected = renodx::color::correct::Gamma(finalcolorSDR, false, 2.2f);
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
-    float3 untonemappedGameGamma = (prefinalcolor * unclampedgradedColor);
-    float3 untonemapped = max(0, prefinalcolor.rgb);
+    // float3 untonemappedNoGameGamma = pow(prefinalcolor, 1 / g_CurveParams.x);
+    // float3 GradedNoGamaGamma = pow(unclampedgradedColor, 1 / g_CurveParams.x);
+    float3 untonemapped = max(0, pow(prefinalcolor, 1/g_CurveParams.x));
     float3 untonemapped_Decode = renodx::color::srgb::Decode(untonemapped);
     float3 untonemapped_Encode = renodx::color::srgb::Encode(untonemapped);
-    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped);
+    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
     float3 tonemapped_Decode = renodx::color::srgb::Decode(tonemapped);
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped);
+      //o.rgb = renodx::color::correct::Gamma(o.rgb, false, 2.2f);
     } else {
       o.rgb = finalcolorSDRVanilla.xyz;
     }

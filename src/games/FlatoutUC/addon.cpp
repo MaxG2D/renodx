@@ -448,11 +448,12 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "FxSkyboxIntensity",
         .binding = &shader_injection.Custom_Skybox_Intensity,
-        .default_value = 100.f,
+        .default_value = 50.f,
         .label = "Skybox Boost Intensity",
         .section = "Effects",
         .tooltip = "Skybox HDR boost intensity multiplier.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.Custom_Skybox_EnableBoost >= 1; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -463,16 +464,18 @@ renodx::utils::settings::Settings settings = {
         .section = "Effects",
         .tooltip = "Skybox HDR boost saturation multiplier.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.Custom_Skybox_EnableBoost >= 1; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "FxSkyboxCurve",
         .binding = &shader_injection.Custom_Skybox_Curve,
-        .default_value = 35.f,
+        .default_value = 70.f,
         .label = "Skybox Luminance-Chrominance curve",
         .section = "Effects",
         .tooltip = "Skybox luminance-chrominance curve adjustment. Lower value boost luma more, higher value boost chroma more.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.Custom_Skybox_EnableBoost >= 1; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -501,9 +504,9 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f); },
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f); },
     },
     new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
@@ -531,9 +534,9 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 80.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 58.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f); },
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f); },
     },
 };
 
@@ -575,9 +578,9 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 35.f);   
+     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f);   
 }
 
 const auto UPGRADE_TYPE_NONE = 0.f;
