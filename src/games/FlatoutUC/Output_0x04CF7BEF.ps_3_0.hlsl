@@ -118,13 +118,13 @@ float4 main(PS_INPUT input) : COLOR
     // 6. Final Levels & Post-Curve
     // ----------------------------
     float3 postCurve;
-    //if (Custom_Bypass_GameProcessing == 0.f || RENODX_TONE_MAP_TYPE == 0.f) {
+    if (Custom_Bypass_GameProcessing == 0.f || RENODX_TONE_MAP_TYPE == 0.f) {
       float3 postCurveLog = log2(max(contrastColor, EPSILON));
       float3 postCurveExp = postCurveLog * g_BleachParams.w;
       postCurve = exp2(postCurveExp);
-    //} else {
-    //  postCurve = contrastColor;
-    //}
+    } else {
+      postCurve = contrastColor;
+    }
 
     float3 levelsDiff;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
@@ -159,7 +159,7 @@ float4 main(PS_INPUT input) : COLOR
     }
     float3 finalcolorSDR = unclampedgradedColor;
     if (Custom_Bypass_GameProcessing > 0.f) {
-      finalcolorSDR = pow(max(finalcolorSDR, 0.f), g_CurveParams.x);
+      finalcolorSDR = finalcolorSDR;
     } else {
       finalcolorSDR = pow(max(finalcolorSDR, 0.f), g_CurveParams.x);
       
