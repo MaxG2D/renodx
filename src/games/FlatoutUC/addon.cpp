@@ -529,7 +529,7 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
-        renodx::utils::settings::UpdateSetting("FxBloomThreshold", 60.f);
+        renodx::utils::settings::UpdateSetting("FxBloomThreshold", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);

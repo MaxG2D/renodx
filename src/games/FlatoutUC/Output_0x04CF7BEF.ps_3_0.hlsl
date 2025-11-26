@@ -173,8 +173,9 @@ float4 main(PS_INPUT input) : COLOR
     float3 untonemapped;
     float3 untonemapped_Encode;
     if (Custom_Bypass_GameProcessing > 0.f) {
-      // untonemapped = pow(max(prefinalcolor, 0.f), g_CurveParams.x);
-      untonemapped = renodx::color::srgb::Encode(prefinalcolor); 
+      untonemapped = max(prefinalcolor, 0.f);
+      //untonemapped = pow(max(prefinalcolor, 0.f), g_CurveParams.x);
+      //untonemapped = renodx::color::srgb::Encode(prefinalcolor); 
     } else {
       untonemapped = pow(max(prefinalcolor, 0.f), g_CurveParams.x);
     }
@@ -183,16 +184,16 @@ float4 main(PS_INPUT input) : COLOR
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
     float3 tonemapped_Decode = renodx::color::srgb::Decode(tonemapped);
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
-
+    /*
     if (Custom_Bypass_GameProcessing > 0.f) {
       //tonemapped = pow(tonemapped, 1 / g_CurveParams.x);
       tonemapped = tonemapped_Encode;
     } else {
       tonemapped = tonemapped_Encode;
     }
-
+    */
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped);
+      o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped_Encode);
     } else {
       o.rgb = finalcolorSDRVanilla.xyz;
     }
