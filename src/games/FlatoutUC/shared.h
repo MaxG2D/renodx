@@ -90,7 +90,7 @@ struct ShaderInjectData {
   float Custom_Skybox_Saturation;
   float Custom_Skybox_Curve;
   float Custom_Skybox_EnableBoost;
-  float padding1;
+  float Custom_Bypass_GameProcessing;
 
 };
 
@@ -142,6 +142,7 @@ float4 shader_injection[12] : register(c150);
 #define Custom_Skybox_Saturation               shader_injection[10][0]
 #define Custom_Skybox_Curve                    shader_injection[10][1]
 #define Custom_Skybox_EnableBoost              shader_injection[10][2]
+#define Custom_Bypass_GameProcessing           shader_injection[10][3]
 
 
 #define RENODX_RENO_DRT_TONE_MAP_METHOD renodx::tonemap::renodrt::config::tone_map_method::REINHARD
@@ -197,6 +198,7 @@ cbuffer shader_injection : register(b13) {
 #define Custom_Skybox_Saturation               shader_injection.Custom_Skybox_Saturation
 #define Custom_Skybox_Curve                    shader_injection.Custom_Skybox_Curve
 #define Custom_Skybox_EnableBoost              shader_injection.Custom_Skybox_EnableBoost
+#define Custom_Bypass_GameProcessing           shader_injection.Custom_Bypass_GameProcessing
 
 #endif
 

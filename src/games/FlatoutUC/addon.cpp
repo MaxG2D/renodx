@@ -374,16 +374,6 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
-        .key = "FXBloomTintAmount",
-        .binding = &shader_injection.Custom_Bloom_Tint,
-        .default_value = 50.f,
-        .label = "Bloom tint amount",
-        .section = "Effects",
-        .tooltip = "Bloom tint amount. 50 is vanilla amount.",
-        .max = 100.f,
-        .parse = [](float value) { return value * 0.02f; },
-    },
-    new renodx::utils::settings::Setting{
         .key = "FxDesaturationAmount",
         .binding = &shader_injection.Custom_Color_Desaturation,
         .default_value = 50.f,
@@ -391,16 +381,18 @@ renodx::utils::settings::Settings settings = {
         .section = "Effects",
         .tooltip = "Color desaturation amount. 50 is vanilla amount.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.Custom_Bypass_GameProcessing == 0; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "FxContrastAmount",
         .binding = &shader_injection.Custom_Color_Contrast,
-        .default_value = 0.f,
+        .default_value = 50.f,
         .label = "Contrast Amount",
         .section = "Effects",
         .tooltip = "Color contrast amount. 50 is vanilla amount.",    
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.Custom_Bypass_GameProcessing == 0; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -411,6 +403,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Effects",
         .tooltip = "Color levels amount. 50 is vanilla amount.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.Custom_Bypass_GameProcessing == 0; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -479,6 +472,18 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "FxBypassGameProcessing",
+        .binding = &shader_injection.Custom_Bypass_GameProcessing,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 0.f,
+        .label = "Bypass Game Processing",
+        .section = "Effects",
+        .tooltip = "Bypasses all in-game color grading and effects processing.",
+        .labels = {"Vanilla", "Off"},
+        .max = 1.f,
+        .parse = [](float value) { return value; },
+    },
+    new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
     .label = "Reset",
     .section = "Color Grading Templates",
@@ -497,7 +502,6 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
@@ -506,7 +510,8 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f); },
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f); 
+        renodx::utils::settings::UpdateSetting("FxBypassGameProcessing", 0);},
     },
     new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
@@ -527,7 +532,6 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxBloomThreshold", 75.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 25.f);
-        renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
@@ -536,7 +540,8 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f); },
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f); 
+        renodx::utils::settings::UpdateSetting("FxBypassGameProcessing", 1);},
     },
 };
 
@@ -571,7 +576,6 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
      renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
      renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
-     renodx::utils::settings::UpdateSetting("FxBloomTintAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
@@ -580,7 +584,8 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
      renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f);   
+     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 70.f);
+     renodx::utils::settings::UpdateSetting("FxBypassGameProcessing", 0);   
 }
 
 const auto UPGRADE_TYPE_NONE = 0.f;
