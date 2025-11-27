@@ -34,10 +34,8 @@ float4 main(PS_INPUT input) : COLOR
     float4 exposure     = tex2D(TextureExposure, float2(LUT_V_COORD, 0.0f));
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
-    // Combine Base and Overlay
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
 
-    // Apply Exposure Weighting
     float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
 
     // 2. Color Grading
@@ -56,7 +54,7 @@ float4 main(PS_INPUT input) : COLOR
     // ------------
     float3 colorWithBloom;
     float3 bloomAdjusted = bloomColor.rgb * g_BloomTint.rgb;
-    float3 linearWithBloom = GammaColor + bloomAdjusted;
+    float3 linearWithBloom = GammaColor + (bloomAdjusted * Custom_Bloom_Amount);
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       colorWithBloom = (bloomAdjusted * Custom_Bloom_Amount) + GammaColor;
@@ -66,7 +64,6 @@ float4 main(PS_INPUT input) : COLOR
 
     // 4. Bleach (Desaturation)
     // -----------------------------
-    // FIX: Ensure input to pow is not negative (possible in HDR manipulation)
     float3 preBleach;
     if (Custom_Bypass_GameProcessing > 0.f && RENODX_TONE_MAP_TYPE > 0.f) {
       preBleach = colorWithBloom;
@@ -90,7 +87,6 @@ float4 main(PS_INPUT input) : COLOR
 
     // 5. Contrast
     // -----------------------------------------------
-    // Calculation: (Luma - 0.5) * Contrast + 0.5
     float contrastNum;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       luma = pow((saturate(luma)), g_CurveParams.x);
@@ -159,39 +155,54 @@ float4 main(PS_INPUT input) : COLOR
     }
     float3 finalcolorSDR = unclampedgradedColor;
     if (Custom_Bypass_GameProcessing > 0.f) {
-      finalcolorSDR = finalcolorSDR;
+      finalcolorSDR = pow(max(finalcolorSDR, 0.f), g_CurveParams.x);
+      finalcolorSDR = log2(max(finalcolorSDR, EPSILON));
+      finalcolorSDR = finalcolorSDR * g_BleachParams.w;
+      finalcolorSDR = exp2(finalcolorSDR);
     } else {
       finalcolorSDR = pow(max(finalcolorSDR, 0.f), g_CurveParams.x);
-      
     }
     finalcolorSDR = saturate(finalcolorSDR);
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
-    // float3 untonemappedNoGameGamma = pow(prefinalcolor, 1 / g_CurveParams.x);
-    // float3 GradedNoGamaGamma = pow(unclampedgradedColor, 1 / g_CurveParams.x);
-
     float3 untonemapped;
-    float3 untonemapped_Encode;
     if (Custom_Bypass_GameProcessing > 0.f) {
       untonemapped = max(prefinalcolor, 0.f);
-      //untonemapped = pow(max(prefinalcolor, 0.f), g_CurveParams.x);
-      //untonemapped = renodx::color::srgb::Encode(prefinalcolor); 
+      untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
+      untonemapped = log2(max(untonemapped, EPSILON));
+      untonemapped = untonemapped * g_BleachParams.w;
+      untonemapped = exp2(untonemapped);
     } else {
-      untonemapped = pow(max(prefinalcolor, 0.f), g_CurveParams.x);
+      untonemapped = max(prefinalcolor, 0.f);
+      untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
+      untonemapped = log2(max(untonemapped, EPSILON));
+      untonemapped = untonemapped * g_BleachParams.w;
+      untonemapped = exp2(untonemapped);
+      untonemapped *= 0.8f; // Matching SDR :(
     }
+
     float3 untonemapped_Decode = renodx::color::srgb::Decode(untonemapped);
-    //float3 untonemapped_Encode = renodx::color::srgb::Encode(untonemapped);
+    float3 untonemapped_Encode = renodx::color::srgb::Encode(untonemapped);
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
     float3 tonemapped_Decode = renodx::color::srgb::Decode(tonemapped);
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
-    /*
+    
     if (Custom_Bypass_GameProcessing > 0.f) {
-      //tonemapped = pow(tonemapped, 1 / g_CurveParams.x);
-      tonemapped = tonemapped_Encode;
+      /*
+      tonemapped = pow(tonemapped, g_CurveParams.x);
+      tonemapped = log2(max(tonemapped, EPSILON));
+      tonemapped = tonemapped * g_BleachParams.w;
+      tonemapped = exp2(tonemapped);
+      */
     } else {
-      tonemapped = tonemapped_Encode;
+      /*
+      tonemapped = pow(max(tonemapped, 0.f), g_CurveParams.x);
+      tonemapped = log2(max(tonemapped, EPSILON));
+      tonemapped = tonemapped * g_BleachParams.w;
+      tonemapped = exp2(tonemapped);
+      */
     }
-    */
+
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped_Encode);
     } else {

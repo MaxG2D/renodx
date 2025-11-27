@@ -27,7 +27,7 @@ float4 main(PS_INPUT input) : COLOR
         float skyboxLuma = pow(dot(r0.yzw, lumaWeights), 1.5);
         float3 skyboxChroma = r0.yzw + (r0.yzw - skyboxLuma);
         float3 skyboxChromaDir = skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation;
-        r0.yzw *= lerp(skyboxLuma * Custom_Skybox_Intensity * 2, skyboxChromaDir, saturate(Custom_Skybox_Curve * 0.5));
+        r0.yzw *= lerp(skyboxLuma * Custom_Skybox_Intensity, skyboxChromaDir, saturate(Custom_Skybox_Curve * 0.5));
     }
     r1.xyz = g_PS_fogSkydomeColor.xyz - r0.yzw;
     r1.xyz = g_PS_fogFarVariables.z * r1.xyz + r0.yzw;
