@@ -205,6 +205,7 @@ cbuffer shader_injection : register(b13) {
 #endif
 
 #include "../../shaders/renodx.hlsl"
+#include "../../shaders/tonemap.hlsl"
 
 #endif
 

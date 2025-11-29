@@ -15,7 +15,6 @@ struct PS_INPUT
 float4 main(PS_INPUT input) : COLOR
 {
     float4 r0, r1;
-    
     float3 lumaWeights = float3(0.2126f, 0.7152f, 0.0722f);
     r0.x = dot(input.texcoord1.xyz, input.texcoord1.xyz);
     r0.x = rsqrt(r0.x);
@@ -23,15 +22,27 @@ float4 main(PS_INPUT input) : COLOR
     r0.x = saturate(r0.x * g_PS_fogFarVariables.y);
     r1 = tex2D(Tex0, input.texcoord);
     r0.yzw = r1.xyz * g_PS_skyDomeColor.x + g_PS_skyDomeColor.z;
-    if (Custom_Skybox_EnableBoost > 0 && RENODX_TONE_MAP_TYPE > 0.f) {
-        float skyboxLuma = pow(dot(r0.yzw, lumaWeights), 1.5);
-        float3 skyboxChroma = r0.yzw + (r0.yzw - skyboxLuma);
-        float3 skyboxChromaDir = skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation;
-        r0.yzw *= lerp(skyboxLuma * Custom_Skybox_Intensity, skyboxChromaDir, saturate(Custom_Skybox_Curve * 0.5));
+    float3 C_sky = r0.yzw;                    // Color_sky
+    float3 C_fog = g_PS_fogSkydomeColor.xyz;  // Color_fog
+    float K = g_PS_fogFarVariables.z;         // Scattering/Extinction factor
+
+    // The 'pre-fogged' color
+    float3 C_prime_sky = K * (C_fog - C_sky) + C_sky;
+    float3 finalColor = r0.x * (C_sky - C_prime_sky) + C_prime_sky;
+
+    if (Custom_Skybox_EnableBoost > 0 && RENODX_TONE_MAP_TYPE > 0.f) 
+    {
+    float finalLuma = dot(finalColor, lumaWeights);
+    float L_min = 0.0f;
+    float L_max = 32.0f;
+    float boostIntensity = smoothstep(L_min, L_max, finalLuma);
+    float skyboxLuma = pow(dot(finalColor, lumaWeights), 1.5);
+    float3 skyboxChroma = finalColor + (finalColor - skyboxLuma);
+    float3 skyboxChromaDir = skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation;
+    float3 boostMultiplier_Direction = lerp(skyboxLuma, skyboxChromaDir, saturate(Custom_Skybox_Curve * 0.5));
+    float3 fullyBoostedColor = finalColor * (boostMultiplier_Direction * 25.0f * Custom_Skybox_Intensity);
+    finalColor = lerp(finalColor, fullyBoostedColor, boostIntensity);
     }
-    r1.xyz = g_PS_fogSkydomeColor.xyz - r0.yzw;
-    r1.xyz = g_PS_fogFarVariables.z * r1.xyz + r0.yzw;
-    r0.yzw = r0.yzw - r1.xyz;
-    float3 finalColor = r0.x * r0.yzw + r1.xyz;
+
     return float4(finalColor, 1.0);
 }

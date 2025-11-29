@@ -1,4 +1,6 @@
+//#include "../../shaders/tonemap.hlsl"
 #include "./shared.h"
+
 
 // Output shader
 sampler2D TextureBase     : register(s0); // s0: Main Render
@@ -20,14 +22,27 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : COLOR
 {
+    renodx::tonemap::Config config = renodx::tonemap::config::Create();
+    config.type = RENODX_TONE_MAP_TYPE;
+    config.peak_nits = RENODX_PEAK_WHITE_NITS;
+    config.game_nits = RENODX_DIFFUSE_WHITE_NITS;
+    config.gamma_correction = RENODX_GAMMA_CORRECTION;
+    config.exposure = RENODX_TONE_MAP_EXPOSURE;
+    config.highlights = RENODX_TONE_MAP_HIGHLIGHTS;
+    config.shadows = RENODX_TONE_MAP_SHADOWS;
+    config.contrast = RENODX_TONE_MAP_CONTRAST;
+    config.saturation = RENODX_TONE_MAP_SATURATION;
+    config.mid_gray_value = 0.18;
+    config.mid_gray_nits = 0.18 * 100.f;
+    config.reno_drt_dechroma = RENODX_TONE_MAP_BLOWOUT;
+    
     // Constants
     const float3 LUMA_WEIGHTS = float3(0.2126f, 0.7152f, 0.0722f); 
     const float  LUT_OFFSET   = 0.00048828125f;
     const float  LUT_V_COORD  = 0.03125f;
     const float  EPSILON      = 1e-7;
 
-    // 1. Texture Composition
-    // ----------------------
+    // Texture Composition
     float4 o            = float4(0, 0, 0, 1);
     float4 baseColor    = tex2D(TextureBase, input.uv);
     float4 overlayColor = tex2D(TextureOverlay, input.uv);
@@ -35,26 +50,21 @@ float4 main(PS_INPUT input) : COLOR
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
-
     float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
+    float3 linearWithBloom = baseColor.rgb + ((bloomColor.rgb * g_BloomTint.rgb) * Custom_Bloom_Amount);
 
-    // 2. Color Grading
-    // --------------------------------------------------
+    // Color Grading
     float3 gradedColor = exposuremultipliedLinearColor;
     float3 lutUV = exposuremultipliedLinearColor * g_CurveParams.y + LUT_OFFSET;
-    if (RENODX_TONE_MAP_TYPE <= 0.f) {
-          gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
-          gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
-          gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
-          gradedColor = pow(gradedColor, g_CurveParams.x);
-    }
+    gradedColor.r = tex2D(TextureGrading, float2(lutUV.r, LUT_V_COORD)).r;
+    gradedColor.g = tex2D(TextureGrading, float2(lutUV.g, LUT_V_COORD)).r;
+    gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
+    gradedColor = pow(gradedColor, g_CurveParams.x);
     float3 GammaColor = gradedColor;
 
-    // 3. Add Bloom
-    // ------------
+    // Add Bloom
     float3 colorWithBloom;
     float3 bloomAdjusted = bloomColor.rgb * g_BloomTint.rgb;
-    float3 linearWithBloom = GammaColor + (bloomAdjusted * Custom_Bloom_Amount);
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
       colorWithBloom = (bloomAdjusted * Custom_Bloom_Amount) + GammaColor;
@@ -62,14 +72,9 @@ float4 main(PS_INPUT input) : COLOR
       colorWithBloom = saturate(bloomAdjusted + GammaColor);
     }
 
-    // 4. Bleach (Desaturation)
-    // -----------------------------
+    // Bleach (Desaturation)
     float3 preBleach;
-    if (Custom_Bypass_GameProcessing > 0.f && RENODX_TONE_MAP_TYPE > 0.f) {
-      preBleach = colorWithBloom;
-    } else {
-      preBleach = pow(max(colorWithBloom, 0.f), g_BleachParams.z);
-    }
+    preBleach = pow(max(colorWithBloom, 0.f), g_BleachParams.z);
     float luma = dot(preBleach, LUMA_WEIGHTS);
     
     float3 bleachSample = tex2D(TextureBleach, float2(luma, LUT_V_COORD)).rgb;
@@ -85,11 +90,9 @@ float4 main(PS_INPUT input) : COLOR
         bleachResult = lerp(preBleach, bleachSample, g_BleachParams.y);
     }
 
-    // 5. Contrast
-    // -----------------------------------------------
+    // Contrast Adjustment
     float contrastNum;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      luma = pow((saturate(luma)), g_CurveParams.x);
         contrastNum = (luma - 0.5f) * g_BleachParams.x + 0.5f;
         contrastNum = max(contrastNum, 0.f);
     } else {
@@ -111,16 +114,11 @@ float4 main(PS_INPUT input) : COLOR
         contrastColor = saturate(bleachResult * contrastScale);
     }
 
-    // 6. Final Levels & Post-Curve
-    // ----------------------------
+    // Final Levels & Post-Curve
     float3 postCurve;
-    if (Custom_Bypass_GameProcessing == 0.f || RENODX_TONE_MAP_TYPE == 0.f) {
-      float3 postCurveLog = log2(max(contrastColor, EPSILON));
-      float3 postCurveExp = postCurveLog * g_BleachParams.w;
-      postCurve = exp2(postCurveExp);
-    } else {
-      postCurve = contrastColor;
-    }
+    float3 postCurveLog = log2(max(contrastColor, EPSILON));
+    float3 postCurveExp = postCurveLog * g_BleachParams.w;
+    postCurve = exp2(postCurveExp);
 
     float3 levelsDiff;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
@@ -134,7 +132,7 @@ float4 main(PS_INPUT input) : COLOR
     }
     float3 levelsScale;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-        levelsScale = (levelsDiff >= 0.0f) ? g_Levels.z * Custom_Color_Levels : g_Levels.x;
+        levelsScale = (levelsDiff >= 0.0f) ? g_Levels.z * Custom_Color_Levels : g_Levels.x * Custom_Color_Levels;
     } else {
         levelsScale = (levelsDiff >= 0.0f) ? g_Levels.z : g_Levels.x;
     }
@@ -144,69 +142,27 @@ float4 main(PS_INPUT input) : COLOR
     } else {
       prefinalcolor = levelsDiff * (levelsScale) + 0.5f;
     }
-    // 7. Final Output
-    // ---------------
-    float3 unclampedgradedColor = prefinalcolor;
-    if (Custom_Bypass_GameProcessing <= 0) {
-      float3 unclampedlutUV = unclampedgradedColor * g_CurveParams.y + LUT_OFFSET;
-      unclampedgradedColor.r = tex2D(TextureGrading, float2(unclampedlutUV.r, LUT_V_COORD)).r;
-      unclampedgradedColor.g = tex2D(TextureGrading, float2(unclampedlutUV.g, LUT_V_COORD)).r;
-      unclampedgradedColor.b = tex2D(TextureGrading, float2(unclampedlutUV.b, LUT_V_COORD)).r;
-    }
-    float3 finalcolorSDR = unclampedgradedColor;
-    if (Custom_Bypass_GameProcessing > 0.f) {
-      finalcolorSDR = pow(max(finalcolorSDR, 0.f), g_CurveParams.x);
-      finalcolorSDR = log2(max(finalcolorSDR, EPSILON));
-      finalcolorSDR = finalcolorSDR * g_BleachParams.w;
-      finalcolorSDR = exp2(finalcolorSDR);
-    } else {
-      finalcolorSDR = pow(max(finalcolorSDR, 0.f), g_CurveParams.x);
-    }
+
+    float3 finalcolorSDR = prefinalcolor;
+    finalcolorSDR = renodx::color::correct::GammaSafe(finalcolorSDR, false, 2.2f);
     finalcolorSDR = saturate(finalcolorSDR);
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
-    float3 untonemapped;
-    if (Custom_Bypass_GameProcessing > 0.f) {
-      untonemapped = max(prefinalcolor, 0.f);
-      untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
-      untonemapped = log2(max(untonemapped, EPSILON));
-      untonemapped = untonemapped * g_BleachParams.w;
-      untonemapped = exp2(untonemapped);
-    } else {
-      untonemapped = max(prefinalcolor, 0.f);
-      untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
-      untonemapped = log2(max(untonemapped, EPSILON));
-      untonemapped = untonemapped * g_BleachParams.w;
-      untonemapped = exp2(untonemapped);
-      untonemapped *= 0.8f; // Matching SDR :(
-    }
-
+    float3 untonemapped = max(linearWithBloom, 0.f);
     float3 untonemapped_Decode = renodx::color::srgb::Decode(untonemapped);
     float3 untonemapped_Encode = renodx::color::srgb::Encode(untonemapped);
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
     float3 tonemapped_Decode = renodx::color::srgb::Decode(tonemapped);
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
-    
-    if (Custom_Bypass_GameProcessing > 0.f) {
-      /*
-      tonemapped = pow(tonemapped, g_CurveParams.x);
-      tonemapped = log2(max(tonemapped, EPSILON));
-      tonemapped = tonemapped * g_BleachParams.w;
-      tonemapped = exp2(tonemapped);
-      */
-    } else {
-      /*
-      tonemapped = pow(max(tonemapped, 0.f), g_CurveParams.x);
-      tonemapped = log2(max(tonemapped, EPSILON));
-      tonemapped = tonemapped * g_BleachParams.w;
-      tonemapped = exp2(tonemapped);
-      */
-    }
 
-    if (RENODX_TONE_MAP_TYPE > 0.f) {
+    if (RENODX_TONE_MAP_TYPE > 0.f && RENODX_TONE_MAP_TYPE != 2.f) {
       o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped_Encode);
-    } else {
+    } else if (RENODX_TONE_MAP_TYPE == 0.f){
       o.rgb = finalcolorSDRVanilla.xyz;
+    } else if (RENODX_TONE_MAP_TYPE == 2.f) {
+      o.rgb = renodx::tonemap::config::ApplyACES(untonemapped, config);
+      tonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
+      o.rgb = renodx::tonemap::UpgradeToneMap(o.rgb, tonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);
