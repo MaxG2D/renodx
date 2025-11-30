@@ -46,7 +46,7 @@ float4 main(PS_INPUT input) : COLOR
     // The ASM implements a "Soft Knee" curve logic based on the threshold.
     float threshold;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      threshold = g_BloomCurve.x * pow(max(Custom_Bloom_Threshold, EPSILON), 3.3);
+      threshold = max(g_BloomCurve.x * pow(max(Custom_Bloom_Threshold, EPSILON), 3.3), EPSILON);
     } else {
       threshold = g_BloomCurve.x;
     }
