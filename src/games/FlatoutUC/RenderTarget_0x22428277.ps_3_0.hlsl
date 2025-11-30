@@ -192,7 +192,7 @@ float4 main(PS_IN i) : COLOR
     // (add diffuse contribution)
     float3 diffuseAcc = r2w_post * float3(g_PS_diffuseLightColor.x, g_PS_diffuseLightColor.x, g_PS_diffuseLightColor.x)
                         + ambientTerm;
-    float3 lit = r1_x * g_PS_externalLight.xyz + diffuseAcc;
+    float3 lit = max(r1_x * g_PS_externalLight.xyz + diffuseAcc, 0.f);
     // r2.xyz was earlier texInfluence
     float3 r2_xyz_squared = texInfluence * texInfluence;
     lit *= r2_xyz_squared;
