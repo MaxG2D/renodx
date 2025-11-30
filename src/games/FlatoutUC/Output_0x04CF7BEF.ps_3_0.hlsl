@@ -169,7 +169,8 @@ float4 main(PS_INPUT input) : COLOR
           config.saturation);
       float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config);
       float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
-      o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
+      //o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
+      o.rgb = AcesUntonemapped;
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);

@@ -14,10 +14,10 @@ struct PS_IN
 float4 main(PS_IN input) : COLOR
 {
     // Sample the texture (texld r0, v1, s0)
-    float4 f4TextureColor = tex2D(Tex0, input.texcoord);
+    float4 TextureColor = tex2D(Tex0, input.texcoord);
     
     // Multiply the texture color by the vertex color (mul oC0, r0, v0)
-    float4 f4OutputColor = f4TextureColor * input.color;
+    float4 OutputColor = TextureColor * input.color;
 
-    return f4OutputColor;
+    return OutputColor;
 }

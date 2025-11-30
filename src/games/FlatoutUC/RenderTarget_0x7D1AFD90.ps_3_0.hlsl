@@ -40,8 +40,8 @@ float4 main(PS_IN i) : COLOR
     // Texture sample + dimming
     //
     float4 texColor  = tex2D(Tex0, uv);
-    //float4 dimmed    = (texColor * c1.x);      // *0.7
-	float4 dimmed    = (texColor);      // *0.7, removed
+    // float4 dimmed    = saturate(texColor * c1.x);      // *0.7
+    float4 dimmed = (texColor * c1.x);
     float4 modulated = dimmed * brightness;            // r0
 
     //
