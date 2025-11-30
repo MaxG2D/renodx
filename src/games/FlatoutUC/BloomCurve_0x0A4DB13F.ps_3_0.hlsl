@@ -18,7 +18,8 @@ struct PS_INPUT
 float4 main(PS_INPUT input) : COLOR
 {
     // Constants
-    const float3 LUMA_WEIGHTS = float3(0.333f, 0.333f, 0.333f);
+    const float3 VANILLA_WEIGHTS = float3(0.333f, 0.333f, 0.333f);
+    const float3 LUMA_WEIGHTS = float3(0.2126f, 0.7152f, 0.0722f);
     const float  EPSILON      = 0.001f;
     const float  TINT_UV_X    = 0.03125f; // Center of 1st pixel in 32px texture
 
@@ -33,7 +34,12 @@ float4 main(PS_INPUT input) : COLOR
 
     // 3. Calculate Luminance
     // Using a uniform weight (0.333) approximation + epsilon to prevent div-by-zero
-    float luma = dot(tintedColor, LUMA_WEIGHTS);
+    float luma;
+    //if (RENODX_TONE_MAP_TYPE > 0.f) {
+    //  luma = dot(tintedColor, LUMA_WEIGHTS);
+    //} else {
+      luma = dot(tintedColor, VANILLA_WEIGHTS);
+    //}
     luma += EPSILON;
 
     // 4. Bloom Curve Logic
@@ -57,9 +63,9 @@ float4 main(PS_INPUT input) : COLOR
     }
     else
     {
-        // Below Threshold: Scaled fraction of logic
-        // Value = (Luma * LowIntensity) / Threshold
-        bloomFactor = (luma * intensityLow) / threshold;
+      // Below Threshold: Scaled fraction of logic
+      // Value = (Luma * LowIntensity) / Threshold
+      bloomFactor = (luma * max(intensityLow, EPSILON)) / threshold;
     }
 
     // 5. Reconstruct Color

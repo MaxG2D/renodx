@@ -535,10 +535,10 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 5.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 0.f);
-        renodx::utils::settings::UpdateSetting("FxContrastAmount", 0.f);
+        renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 80.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 55.f);
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 60.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 45.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 15.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);

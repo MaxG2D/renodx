@@ -51,7 +51,7 @@ float4 main(PS_INPUT input) : COLOR
 
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
     float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
-    float3 linearWithBloom = baseColor.rgb + ((bloomColor.rgb * g_BloomTint.rgb) * Custom_Bloom_Amount);
+    float3 linearWithBloom = exposuremultipliedLinearColor.rgb + ((bloomColor.rgb * g_BloomTint.rgb) * Custom_Bloom_Amount);
 
     // Color Grading
     float3 gradedColor = exposuremultipliedLinearColor;
@@ -144,7 +144,7 @@ float4 main(PS_INPUT input) : COLOR
     }
 
     float3 finalcolorSDR = prefinalcolor;
-    finalcolorSDR = renodx::color::correct::GammaSafe(finalcolorSDR, false, 2.2f);
+    //finalcolorSDR = renodx::color::correct::GammaSafe(finalcolorSDR, true, 2.2f);
     finalcolorSDR = saturate(finalcolorSDR);
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
@@ -160,9 +160,16 @@ float4 main(PS_INPUT input) : COLOR
     } else if (RENODX_TONE_MAP_TYPE == 0.f){
       o.rgb = finalcolorSDRVanilla.xyz;
     } else if (RENODX_TONE_MAP_TYPE == 2.f) {
-      o.rgb = renodx::tonemap::config::ApplyACES(untonemapped, config);
-      tonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
-      o.rgb = renodx::tonemap::UpgradeToneMap(o.rgb, tonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
+      untonemapped = renodx::color::grade::UserColorGrading(
+          untonemapped,
+          config.exposure,
+          config.highlights,
+          config.shadows,
+          config.contrast,
+          config.saturation);
+      float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config);
+      float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
+      o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);

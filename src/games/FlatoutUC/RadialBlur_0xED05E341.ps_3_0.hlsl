@@ -9,13 +9,13 @@ sampler2D s1 : register( s1 );
 sampler2D SceneDepthMap : register( s12 );
 float4 g_PS_depthBufferScale : register( c52 ); 
 
-static const int TOTAL_SAMPLES = 32;
+static const int TOTAL_SAMPLES = 64;
 static const float INV_SAMPLE_COUNT = 1.0f / (float)(TOTAL_SAMPLES); 
 static const float HALF_FLOAT = 0.5;
 
-static const float BLUR_MIN_RADIUS = 0.3f; 
+static const float BLUR_MIN_RADIUS = 0.2f; 
 static const float BLUR_MAX_RADIUS = 0.7f;
-static const float2 CENTER_OFFSET = float2(0.0, 0.1);
+static const float2 CENTER_OFFSET = float2(0.0, 0.0);
 static const float GAMMA = 2.2f;
 static const float INV_GAMMA = 1.0f / 2.2f;
 static const float3 LUMINANCE_VECTOR = float3(0.2126f, 0.7152f, 0.0722f);
@@ -23,9 +23,8 @@ static const float DEPTH_FALLOFF_START = 0.0f;
 static const float DEPTH_FALLOFF_END = 150.0f; 
 
 // --- STABILIZATION CONSTANTS ---
-static const float MAX_VELOCITY_SCALE = 1.5f;   // Limit the input velocity magnitude
-static const float MAX_STREAK_LENGTH = 0.10f;  // Max streak length as a fraction of screen (15%)
-static const float MAX_DEPTH_DIFF = 0.003f;    // Max raw depth (0..1) difference allowed between pixel and sample
+static const float MAX_STREAK_LENGTH = 0.15f;  // Max streak length as a fraction of screen
+static const float MAX_DEPTH_DIFF = 0.025f;    // Max raw depth (0..1) difference allowed between pixel and sample
 // ------------------------------
 
 float LinearizeDepth(float depthSample)
@@ -63,11 +62,11 @@ float4 main(float2 texcoord : TEXCOORD) : COLOR
     // UV Setup
     float2 blurCenter = g_vRadialBlurParams.xy + CENTER_OFFSET; 
     float4 centerToUVDirection = texcoord.xyxy - blurCenter.xyxy;
-    float velocityMagnitude = min(g_vRadialBlurParams.z, MAX_VELOCITY_SCALE);
+    float velocityMagnitude = g_vRadialBlurParams.z;
     float distFromCenter = length(pow(centerToUVDirection.xy, 1.0f));
     float blurIntensity = smoothstep(BLUR_MIN_RADIUS, BLUR_MAX_RADIUS, distFromCenter); 
     float scaledBlurIntensity = blurIntensity * depthFactor;
-    float2 fullStepVector = centerToUVDirection.xy * (velocityMagnitude * 4.0f) * scaledBlurIntensity;
+    float2 fullStepVector = centerToUVDirection.xy * (velocityMagnitude * 1.0f) * scaledBlurIntensity;
     float stepLength = length(fullStepVector);
     fullStepVector = fullStepVector / max(stepLength, 0.0001f) * min(stepLength, MAX_STREAK_LENGTH);
 
@@ -102,7 +101,7 @@ float4 main(float2 texcoord : TEXCOORD) : COLOR
     // Alpha Mask Blending (using max to combine masks cleanly)
     float2 maskUV = CalculateMaskWarpUV(centerToUVDirection, g_vRadialBlurParams);
     float rawMaskAlpha = tex2D(s1, maskUV).w;
-    if (velocityMagnitude > 0.01f)
+    if (velocityMagnitude > 0.25f)
     {
         finalOutput.w = scaledBlurIntensity;
     }
