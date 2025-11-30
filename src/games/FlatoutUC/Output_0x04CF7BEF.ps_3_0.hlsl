@@ -116,7 +116,7 @@ float4 main(PS_INPUT input) : COLOR
 
     // Final Levels & Post-Curve
     float3 postCurve;
-    float3 postCurveLog = log2(max(contrastColor, EPSILON));
+    float3 postCurveLog = log2(max(contrastColor, 0.f));
     float3 postCurveExp = postCurveLog * g_BleachParams.w;
     postCurve = exp2(postCurveExp);
 
@@ -149,6 +149,12 @@ float4 main(PS_INPUT input) : COLOR
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
     float3 untonemapped = max(linearWithBloom, 0.f);
+    untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
+    untonemapped = pow(max(untonemapped, 0.f), g_BleachParams.z);
+    //untonemapped = log2(max(untonemapped, 0.f));
+    //untonemapped = untonemapped * 1/g_BleachParams.w;
+    //untonemapped = exp2(untonemapped);
+    untonemapped = renodx::color::srgb::Decode(untonemapped);
     float3 untonemapped_Decode = renodx::color::srgb::Decode(untonemapped);
     float3 untonemapped_Encode = renodx::color::srgb::Encode(untonemapped);
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
@@ -169,8 +175,8 @@ float4 main(PS_INPUT input) : COLOR
           config.saturation);
       float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config);
       float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
-      //o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
-      o.rgb = AcesUntonemapped;
+      o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
+      //o.rgb = AcesUntonemapped;
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);
