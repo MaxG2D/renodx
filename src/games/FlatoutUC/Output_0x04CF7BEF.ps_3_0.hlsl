@@ -152,7 +152,7 @@ float4 main(PS_INPUT input) : COLOR
     untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
     untonemapped = pow(max(untonemapped, 0.f), g_BleachParams.z);
     //untonemapped = log2(max(untonemapped, 0.f));
-    //untonemapped = untonemapped * 1/g_BleachParams.w;
+    untonemapped = untonemapped * 1/g_BleachParams.w;
     //untonemapped = exp2(untonemapped);
     untonemapped = renodx::color::srgb::Decode(untonemapped);
     float3 untonemapped_Decode = renodx::color::srgb::Decode(untonemapped);
@@ -160,6 +160,7 @@ float4 main(PS_INPUT input) : COLOR
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
     float3 tonemapped_Decode = renodx::color::srgb::Decode(tonemapped);
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
+    tonemapped_Encode = renodx::color::correct::GammaSafe(tonemapped_Encode, false, 2.2f);
 
     if (RENODX_TONE_MAP_TYPE > 0.f && RENODX_TONE_MAP_TYPE != 2.f) {
       o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped_Encode);
@@ -173,8 +174,9 @@ float4 main(PS_INPUT input) : COLOR
           config.shadows,
           config.contrast,
           config.saturation);
-      float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config);
-      float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
+      float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemapped_Decode, config);
+      float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemapped_Decode, config, true);
+      Acestonemapped = renodx::color::srgb::Encode(Acestonemapped);
       o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
       //o.rgb = AcesUntonemapped;
     }
