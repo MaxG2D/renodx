@@ -50,8 +50,8 @@ float4 main(PS_INPUT input) : COLOR
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
-    float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
-    float3 linearWithBloom = exposuremultipliedLinearColor.rgb + ((bloomColor.rgb * g_BloomTint.rgb) * Custom_Bloom_Amount);
+    float3 exposuremultipliedLinearColor = composition.rgb * exposure.x + ((bloomColor.rgb * g_BloomTint.rgb) * Custom_Bloom_Amount);
+    float3 linearWithBloom = exposuremultipliedLinearColor.rgb;
 
     // Color Grading
     float3 gradedColor = exposuremultipliedLinearColor;
@@ -64,11 +64,13 @@ float4 main(PS_INPUT input) : COLOR
 
     // Add Bloom
     float3 colorWithBloom;
-    float3 bloomAdjusted = bloomColor.rgb * g_BloomTint.rgb;
+    float3 bloomAdjusted;
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      colorWithBloom = (bloomAdjusted * Custom_Bloom_Amount) + GammaColor;
+      colorWithBloom = GammaColor;
+      // Moved Bloom at the start of the pipieline compared to vanilla to avoid clipping issues
     } else {
+      bloomAdjusted = bloomColor.rgb * g_BloomTint.rgb;
       colorWithBloom = saturate(bloomAdjusted + GammaColor);
     }
 
@@ -145,7 +147,6 @@ float4 main(PS_INPUT input) : COLOR
 
     float3 finalcolorSDR = prefinalcolor;
     //finalcolorSDR = renodx::color::correct::GammaSafe(finalcolorSDR, true, 2.2f);
-    finalcolorSDR = saturate(finalcolorSDR);
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
     float3 untonemapped = max(linearWithBloom, 0.f);
@@ -160,7 +161,7 @@ float4 main(PS_INPUT input) : COLOR
     float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped_Decode);
     float3 tonemapped_Decode = renodx::color::srgb::Decode(tonemapped);
     float3 tonemapped_Encode = renodx::color::srgb::Encode(tonemapped);
-    tonemapped_Encode = renodx::color::correct::GammaSafe(tonemapped_Encode, false, 2.2f);
+    //tonemapped_Encode = renodx::color::correct::GammaSafe(tonemapped_Encode, false, 2.2f);
 
     if (RENODX_TONE_MAP_TYPE > 0.f && RENODX_TONE_MAP_TYPE != 2.f) {
       o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped_Encode);
