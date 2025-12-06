@@ -23,11 +23,6 @@ float4 main(PS_INPUT input) : COLOR
 {
     // GLOW & DIFFUSE CALCULATION
     float4 glowSample = tex2D(Tex1, input.uv);
-    //glowSample.rgb = ApplyFakeHDRGain(glowSample.rgb, Custom_Particles_Glow, Custom_Particles_Glow_Contrast, 1.f);
-    /* // Old
-    float glowPower = pow(glowSample.a, g_PS_textureGlowParams.y * pow(Custom_Particles_Glow_Contrast, 5));
-    float glowFactor = (glowPower * g_PS_particleIntensity.x * g_PS_textureGlowParams.x * pow(Custom_Particles_Glow, 5)) + 1.0;
-    */
     float glowPower = pow(max(0.f, glowSample.a), g_PS_textureGlowParams.y);
     float glowFactor = (glowPower * g_PS_particleIntensity.x * g_PS_textureGlowParams.x) + 1.0;
 
