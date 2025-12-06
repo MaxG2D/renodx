@@ -36,13 +36,11 @@ float4 main(PS_INPUT input) : COLOR
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
-    float3 exposuremultipliedLinearColor;
-    if (RENODX_TONE_MAP_TYPE > 0.f) {
-      exposuremultipliedLinearColor = composition.rgb * exposure.x + ((bloomColor.rgb * g_BloomTint.rgb) * Custom_Bloom_Amount);
-    } else {
-      exposuremultipliedLinearColor = composition.rgb * exposure.x;
-    }
-    float3 linearWithBloom = exposuremultipliedLinearColor.rgb;
+    float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
+
+    // Moved Bloom at the start of the pipieline in untonemapped compared to vanilla to avoid clipping issues
+    float3 linearWithBloom = exposuremultipliedLinearColor.rgb + (bloomColor.rgb * g_BloomTint.rgb * Custom_Bloom_Amount);
+    float preLUT_luma = dot(linearWithBloom, LUMA_WEIGHTS);
 
     // Tonemapping Configuration required for ACES
     renodx::tonemap::Config config = renodx::tonemap::config::Create();
@@ -67,14 +65,16 @@ float4 main(PS_INPUT input) : COLOR
     gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
     gradedColor = pow(gradedColor, g_CurveParams.x);
     float3 GammaColor = gradedColor;
+    float postLUT_luma = dot(GammaColor + bloomColor.rgb * g_BloomTint.rgb, LUMA_WEIGHTS);
+    float lutRatio = saturate(postLUT_luma / preLUT_luma);
 
     // Add Bloom
     float3 colorWithBloom;
     float3 bloomAdjusted;
 
     if (RENODX_TONE_MAP_TYPE > 0.f) {
+      //colorWithBloom = GammaColor + bloomAdjusted;
       colorWithBloom = GammaColor;
-      // Moved Bloom at the start of the pipieline compared to vanilla to avoid clipping issues
     } else {
       bloomAdjusted = bloomColor.rgb * g_BloomTint.rgb;
       colorWithBloom = saturate(bloomAdjusted + GammaColor);
@@ -135,7 +135,28 @@ float4 main(PS_INPUT input) : COLOR
     float3 prefinalcolor; 
     prefinalcolor = levelsDiff * (levelsScale) + 0.5f;
 
-    float3 finalcolorSDR = saturate(prefinalcolor);
+    if (RENODX_TONE_MAP_TYPE > 0.f) {
+    // Move bloom down to the very end of the pipeline to avoid it getting griefed by various post processing effects
+    // Still, some grading needs to be applied to bloom to match vanilla luminance levels.
+    float3 bloomLinear = bloomColor.rgb * g_BloomTint.rgb;
+    bloomLinear = pow(max(bloomLinear, 0.f), g_CurveParams.x);
+    float3 bloomLinearPreBleach = pow(max(bloomLinear, 0.f), g_BleachParams.z);
+    
+    // No desaturation on bloom, it effectively causes double desaturation. Sad consequence of fixing the cursed pipeline of vanilla game :(
+    //float3 bleachedBloom = lerp(bloomLinearPreBleach, bleachSample, g_BleachParams.y * Custom_Color_Desaturation);
+
+    // We want the bloom to stay linear, but luminance curve needs to match vanilla
+    float3 expBloom = bloomLinearPreBleach * 1/g_BleachParams.w;
+    bloomAdjusted = expBloom;
+    bloomAdjusted = renodx::color::srgb::Decode(bloomAdjusted);
+
+    // Scaling bloom amount based on luminance difference between the pre and post graded image to avoid overbrightening
+    bloomAdjusted *= lutRatio;
+    bloomAdjusted *= Custom_Bloom_Amount;
+    prefinalcolor += bloomAdjusted;
+    }
+
+    float3 finalcolorSDR = prefinalcolor;
     float3 finalcolorSDRVanilla = saturate(prefinalcolor);
 
     float3 untonemapped = max(linearWithBloom, 0.f);

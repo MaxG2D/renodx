@@ -510,9 +510,9 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 15.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 80.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 15.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 100.f); 
         renodx::utils::settings::UpdateSetting("FxBypassGameProcessing", 0);},
     },
     new renodx::utils::settings::Setting{
@@ -537,12 +537,12 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 0.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 65.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 100.f); 
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 95.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 90.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 15.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 100.f); 
         renodx::utils::settings::UpdateSetting("FxBypassGameProcessing", 0);},
     },
 };
@@ -584,9 +584,9 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 15.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 100.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 80.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 15.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxCurve", 100.f);
      renodx::utils::settings::UpdateSetting("FxBypassGameProcessing", 0);   
 }
 

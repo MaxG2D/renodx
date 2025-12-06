@@ -32,7 +32,9 @@ float4 main(PS_INPUT input) : COLOR
     float glowFactor = (glowPower * g_PS_particleIntensity.x * g_PS_textureGlowParams.x) + 1.0;
 
     float3 glowColor = glowSample.rgb * glowFactor;
-    glowColor = ApplyFakeHDRGain(glowColor, pow(Custom_Particles_Glow * 1.5, 10), pow(Custom_Particles_Glow_Contrast, 15), 1.0f);
+    if (RENODX_TONE_MAP_TYPE > 0.f) {
+      glowColor = ApplyFakeHDRGain(glowColor, pow(Custom_Particles_Glow * 1.5, 10), pow(Custom_Particles_Glow_Contrast, 15), 0.0f);
+    }
     float fogInverse = 1.0 - input.fogAndSoft.x;
     glowColor *= fogInverse * glowSample.a;
     float4 diffuseSample = tex2D(Tex0, input.uv);
@@ -40,7 +42,7 @@ float4 main(PS_INPUT input) : COLOR
     float3 foggedDiffuse = lerp(tintedDiffuse.rgb, g_PS_fogColor.rgb, input.fogAndSoft.x);
     float3 finalDiffuse = foggedDiffuse * tintedDiffuse.a;
     float4 combinedColor;
-    combinedColor.rgb = glowColor + finalDiffuse;
+    combinedColor.rgb = max(0.f, glowColor + finalDiffuse);
     combinedColor.a   = tintedDiffuse.a; 
 
     // SOFT PARTICLE DEPTH FADE
