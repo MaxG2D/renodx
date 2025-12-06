@@ -203,7 +203,7 @@ float4 main(PS_IN i) : COLOR
 
     // fog rem
     float3 fogRem = -scaledAlbedo + g_PS_fogColor.xyz;
-    float3 outRGB = i.texcoord.z * fogRem + scaledAlbedo;
+    float3 outRGB = max(0.0f, i.texcoord.z * fogRem + scaledAlbedo);
     float outAlpha = modAlbedo.a;
 
     return float4(outRGB, outAlpha);

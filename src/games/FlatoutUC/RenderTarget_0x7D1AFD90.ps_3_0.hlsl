@@ -53,7 +53,7 @@ float4 main(PS_IN i) : COLOR
     //
     // Final fog blend
     //
-    float3 outRGB = fogFactor * fogOffset + fogInfluence;
+    float3 outRGB = max(0.f, fogFactor * fogOffset + fogInfluence);
     float  outA   = modulated.a;
 
     return float4(outRGB, outA);

@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./FakeHDRGain.h"
 
 // Skybox
 sampler2D Tex0 : register(s0);
@@ -32,16 +33,19 @@ float4 main(PS_INPUT input) : COLOR
 
     if (Custom_Skybox_EnableBoost > 0 && RENODX_TONE_MAP_TYPE > 0.f) 
     {
+        
         float finalLuma = dot(finalColor, lumaWeights);
         float L_min = 0.0f;
         float L_max = 32.0f;
         float boostIntensity = smoothstep(L_min, L_max, finalLuma);
-        float skyboxLuma = pow(dot(finalColor, lumaWeights), 1.5);
+        float skyboxLuma = pow(dot(finalColor, lumaWeights), 2.2);
         float3 skyboxChroma = finalColor + (finalColor - skyboxLuma);
-        float3 skyboxChromaDir = skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation;
+        float3 skyboxChromaDir = max(0.f, skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation * 2);
         float3 boostMultiplier_Direction = lerp(skyboxLuma, skyboxChromaDir, saturate(Custom_Skybox_Curve * 0.5));
-        float3 fullyBoostedColor = finalColor * (boostMultiplier_Direction * 25.0f * Custom_Skybox_Intensity);
-    finalColor = lerp(finalColor, fullyBoostedColor, boostIntensity);
+        float3 fullyBoostedColor = finalColor * (boostMultiplier_Direction * 125.0f * Custom_Skybox_Intensity);
+        finalColor = lerp(finalColor, fullyBoostedColor, boostIntensity);
+        
+        //finalColor = ApplyFakeHDRGain(finalColor, pow(Custom_Skybox_Intensity, 10), pow(Custom_Skybox_Curve, 10), Custom_Skybox_Saturation);
     }
 
     return float4(finalColor, 1.0);

@@ -1,4 +1,5 @@
 #include "./shared.h"
+#include "./FakeHDRGain.h"
 
 // Particles
 sampler2D Tex0          : register(s0);  // Diffuse Texture
@@ -20,13 +21,18 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : COLOR
 {
-    // --- 1. GLOW & DIFFUSE CALCULATION ---
-    float4 glowSample = tex2D(Tex1, input.uv); 
-    // Calculate glow intensity curve
+    // GLOW & DIFFUSE CALCULATION
+    float4 glowSample = tex2D(Tex1, input.uv);
+    //glowSample.rgb = ApplyFakeHDRGain(glowSample.rgb, Custom_Particles_Glow, Custom_Particles_Glow_Contrast, 1.f);
+    /* // Old
     float glowPower = pow(glowSample.a, g_PS_textureGlowParams.y * pow(Custom_Particles_Glow_Contrast, 5));
-    float glowFactor = (glowPower * g_PS_particleIntensity.x * g_PS_textureGlowParams.x * pow(Custom_Particles_Glow, 5)) + 1.0;  
-    float3 glowColor = glowSample.rgb * glowFactor; 
-    // Apply Fog Inverse to Glow
+    float glowFactor = (glowPower * g_PS_particleIntensity.x * g_PS_textureGlowParams.x * pow(Custom_Particles_Glow, 5)) + 1.0;
+    */
+    float glowPower = pow(max(0.f, glowSample.a), g_PS_textureGlowParams.y);
+    float glowFactor = (glowPower * g_PS_particleIntensity.x * g_PS_textureGlowParams.x) + 1.0;
+
+    float3 glowColor = glowSample.rgb * glowFactor;
+    glowColor = ApplyFakeHDRGain(glowColor, pow(Custom_Particles_Glow * 1.5, 10), pow(Custom_Particles_Glow_Contrast, 15), 1.0f);
     float fogInverse = 1.0 - input.fogAndSoft.x;
     glowColor *= fogInverse * glowSample.a;
     float4 diffuseSample = tex2D(Tex0, input.uv);
@@ -37,17 +43,16 @@ float4 main(PS_INPUT input) : COLOR
     combinedColor.rgb = glowColor + finalDiffuse;
     combinedColor.a   = tintedDiffuse.a; 
 
-    // --- 2. SOFT PARTICLE DEPTH FADE (FIXED LOGIC) ---
+    // SOFT PARTICLE DEPTH FADE
     float depthSample = tex2D(SceneDepthMap, input.screenProj.xy).r;  
-    // Reconstruct linear Z/W from the depth map sample 
     float sceneDepth = 1.0 / (depthSample * g_PS_depthBufferScale.x + g_PS_depthBufferScale.y);
-    // Calculate depth difference
     float depthDiff = sceneDepth - input.screenProj.z;
     float softFactor = saturate(depthDiff * input.fogAndSoft.w);
     float finalFade = softFactor * input.fogAndSoft.y;
-    // --- 3. FINAL OUTPUT ---
-    combinedColor *= finalFade; 
+
+    combinedColor *= finalFade;
     combinedColor.rgb *= g_PS_particleIntensity.y;
+    combinedColor.rgb = combinedColor.rgb;
 
     return float4(combinedColor.rgb, combinedColor.a);
 }
