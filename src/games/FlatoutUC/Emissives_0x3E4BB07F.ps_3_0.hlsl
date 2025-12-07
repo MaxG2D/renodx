@@ -20,8 +20,8 @@ float4 main(PS_IN i) : COLOR
 	float3 r2;
 	r0 = tex2D(Tex0, i.texcoord);
 	r1 = r0.xyz * g_PS_nonLitIntensity.xyz;
-	if (RENODX_TONE_MAP_TYPE > 0.f) {
-        r1.xyz = ApplyFakeHDRGain(r1.xyz, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), 0.0f);
+        if (RENODX_TONE_MAP_TYPE > 0.f) {
+          r1.xyz = ApplyFakeHDRGain(r1.xyz, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), Custom_Emissives_Glow_Saturation);
 	}
 	r2.xyz = g_PS_nonLitIntensity.xyz;
 	r0.xyz = g_PS_fogColor.xyz - (r0.xyz * r2);

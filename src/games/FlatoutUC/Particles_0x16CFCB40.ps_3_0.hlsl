@@ -28,7 +28,7 @@ float4 main(PS_INPUT input) : COLOR
 
     float3 glowColor = glowSample.rgb * glowFactor;
     if (RENODX_TONE_MAP_TYPE > 0.f) {
-      glowColor = ApplyFakeHDRGain(glowColor, pow(Custom_Particles_Glow, 15), pow(Custom_Particles_Glow_Contrast, 15), 0.0f);
+      glowColor = ApplyFakeHDRGain(glowColor, pow(Custom_Particles_Glow, 15), pow(Custom_Particles_Glow_Contrast, 15), Custom_Particles_Glow_Saturation);
     }
     float fogInverse = 1.0 - input.fogAndSoft.x;
     glowColor *= fogInverse * glowSample.a;

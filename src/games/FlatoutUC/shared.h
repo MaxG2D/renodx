@@ -88,13 +88,13 @@ struct ShaderInjectData {
   float Custom_Skybox_Intensity;
 
   float Custom_Skybox_Saturation;
-  float Custom_Skybox_Curve;
+  float Custom_Skybox_Contrast;
   float Custom_Skybox_EnableBoost;
   float Custom_Emissives_Glow;
 
   float Custom_Emissives_Glow_Contrast;
-  float padding0;
-  float padding1;
+  float Custom_Emissives_Glow_Saturation;
+  float Custom_Particles_Glow_Saturation;
   float padding2;
 
 };
@@ -145,10 +145,12 @@ float4 shader_injection[12] : register(c150);
 #define Custom_Bloom_BlurSize                  shader_injection[9][2]
 #define Custom_Skybox_Intensity                shader_injection[9][3]
 #define Custom_Skybox_Saturation               shader_injection[10][0]
-#define Custom_Skybox_Curve                    shader_injection[10][1]
+#define Custom_Skybox_Contrast                 shader_injection[10][1]
 #define Custom_Skybox_EnableBoost              shader_injection[10][2]
 #define Custom_Emissives_Glow                  shader_injection[10][3]
 #define Custom_Emissives_Glow_Contrast         shader_injection[11][0]
+#define Custom_Emissives_Glow_Saturation       shader_injection[11][1]
+#define Custom_Particles_Glow_Saturation       shader_injection[11][2]
 
 
 #define RENODX_RENO_DRT_TONE_MAP_METHOD renodx::tonemap::renodrt::config::tone_map_method::REINHARD
@@ -202,10 +204,12 @@ cbuffer shader_injection : register(b13) {
 #define Custom_Bloom_BlurSize                  shader_injection.Custom_Bloom_BlurSize
 #define Custom_Skybox_Intensity                shader_injection.Custom_Skybox_Intensity
 #define Custom_Skybox_Saturation               shader_injection.Custom_Skybox_Saturation
-#define Custom_Skybox_Curve                    shader_injection.Custom_Skybox_Curve
+#define Custom_Skybox_Contrast                    shader_injection.Custom_Skybox_Curve
 #define Custom_Skybox_EnableBoost              shader_injection.Custom_Skybox_EnableBoost
 #define Custom_Emissives_Glow                  shader_injection.Custom_Emissives_Glow
 #define Custom_Emissives_Glow_Contrast         shader_injection.Custom_Emissives_Glow_Contrast
+#define Custom_Emissives_Glow_Saturation       shader_injection.Custom_Emissives_Glow_Saturation
+#define Custom_Particles_Glow_Saturation       shader_injection.Custom_Particles_Glow_Saturation
 
 #endif
 

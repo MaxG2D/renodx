@@ -33,19 +33,19 @@ float4 main(PS_INPUT input) : COLOR
 
     if (Custom_Skybox_EnableBoost > 0 && RENODX_TONE_MAP_TYPE > 0.f) 
     {
-        /* Old Boost Code
-        float finalLuma = dot(finalColor, lumaWeights);
-        float L_min = 0.0f;
-        float L_max = 32.0f;
-        float boostIntensity = smoothstep(L_min, L_max, finalLuma);
-        float skyboxLuma = pow(dot(finalColor, lumaWeights), 2.2);
-        float3 skyboxChroma = finalColor + (finalColor - skyboxLuma);
-        float3 skyboxChromaDir = max(0.f, skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation * 2);
-        float3 boostMultiplier_Direction = lerp(skyboxLuma, skyboxChromaDir, saturate(Custom_Skybox_Curve * 0.5));
-        float3 fullyBoostedColor = finalColor * (boostMultiplier_Direction * 125.0f * Custom_Skybox_Intensity);
-        finalColor = lerp(finalColor, fullyBoostedColor, boostIntensity);
-        */
-        finalColor = ApplyFakeHDRGain(finalColor, pow(Custom_Skybox_Intensity, 10), pow(Custom_Skybox_Curve, 10), Custom_Skybox_Saturation);
+      /* Old Boost Code
+      float finalLuma = dot(finalColor, lumaWeights);
+      float L_min = 0.0f;
+      float L_max = 32.0f;
+      float boostIntensity = smoothstep(L_min, L_max, finalLuma);
+      float skyboxLuma = pow(dot(finalColor, lumaWeights), 2.2);
+      float3 skyboxChroma = finalColor + (finalColor - skyboxLuma);
+      float3 skyboxChromaDir = max(0.f, skyboxChroma / max(length(skyboxChroma), 1e-6) * Custom_Skybox_Saturation * 2);
+      float3 boostMultiplier_Direction = lerp(skyboxLuma, skyboxChromaDir, saturate(Custom_Skybox_Contrast * 0.5));
+      float3 fullyBoostedColor = finalColor * (boostMultiplier_Direction * 125.0f * Custom_Skybox_Intensity);
+      finalColor = lerp(finalColor, fullyBoostedColor, boostIntensity);
+      */
+      finalColor = ApplyFakeHDRGain(finalColor, pow(Custom_Skybox_Intensity, 15), pow(Custom_Skybox_Contrast, 15), Custom_Skybox_Saturation);
     }
 
     return float4(finalColor, 1.0);
