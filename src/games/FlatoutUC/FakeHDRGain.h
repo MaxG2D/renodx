@@ -13,7 +13,9 @@ float3 ApplyFakeHDRGain(float3 color, float gainScale, float threshold, float sa
     thresholdMask = pow(thresholdMask, 1.5);
 
     // --- 2) Apply gain ---
-    float3 gainMasked = color * (1.0 + gainScale * luminanceInput * thresholdMask);
+    float normalizedGainScale = gainScale - 1.0;
+    float3 gainMasked = color * (1.0 + normalizedGainScale * luminanceInput * thresholdMask);
+    //float3 gainMasked = color * (1.0 + gainScale * luminanceInput * thresholdMask);
 
     // New luminance + chroma after gain
     float luminanceGain = dot(gainMasked, lumaCoeff);
@@ -25,13 +27,15 @@ float3 ApplyFakeHDRGain(float3 color, float gainScale, float threshold, float sa
 
     // --- 4) Procedural saturation preservation ---
     // More gainScale = more suppression of boosted saturation
+    float normalizedGainInfluence = saturate(normalizedGainScale);
     float gainInfluence = saturate(gainScale * 1);
 
     // Ratio of how much saturation we *should* keep
     float saturationRatio = saturate(chromaInputMagnitude / chromaMagnitude);
 
     // Blend boosted chroma back toward non-boosted chroma
-    float saturationBleed = gainInfluence * (1.0 - saturationRatio);
+    float saturationBleed = normalizedGainInfluence * (1.0 - saturationRatio);
+    //float saturationBleed = gainInfluence * (1.0 - saturationRatio);
 
     float3 chromaFinal = lerp(chromaBoosted, chroma, saturationBleed);
 
@@ -42,7 +46,9 @@ float3 ApplyFakeHDRGain(float3 color, float gainScale, float threshold, float sa
     float maxValueGain = max(max(output.r, output.g), output.b);
     float headroom = max(1.0, maxValueGain * 5.0);
     float compressMul = 1.0 / (1.0 + maxValueGain / (headroom + EPSILON));
-    output *= compressMul;
+    float finalCompressMul = lerp(1.0, compressMul, saturate(normalizedGainScale));
+    //output *= compressMul;
+    output *= finalCompressMul;
 
     return max(output, 0.0);
 }

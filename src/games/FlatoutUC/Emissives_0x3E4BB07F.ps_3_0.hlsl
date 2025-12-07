@@ -19,11 +19,12 @@ float4 main(PS_IN i) : COLOR
 	float3 r1;
 	float3 r2;
 	r0 = tex2D(Tex0, i.texcoord);
+	r1 = r0.xyz * g_PS_nonLitIntensity.xyz;
 	if (RENODX_TONE_MAP_TYPE > 0.f) {
-		r1.xyz = ApplyFakeHDRGain(r0.xyz, pow(Custom_Particles_Glow * 1.5, 10), pow(Custom_Particles_Glow_Contrast, 15), 0.0f);
+        r1.xyz = ApplyFakeHDRGain(r1.xyz, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), 0.0f);
 	}
 	r2.xyz = g_PS_nonLitIntensity.xyz;
-	r0.xyz = r0.xyz * -r2.xyz + g_PS_fogColor.xyz;
+	r0.xyz = g_PS_fogColor.xyz - (r0.xyz * r2);
 	o.w = r0.w;
 	o.xyz = i.texcoord1.x * r0.xyz + r1.xyz;
 

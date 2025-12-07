@@ -424,6 +424,26 @@ renodx::utils::settings::Settings settings = {
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
+        new renodx::utils::settings::Setting{
+        .key = "FxEmissivesGlow",
+        .binding = &shader_injection.Custom_Emissives_Glow,
+        .default_value = 50.f,
+        .label = "Emissives Glow Intensity",
+        .section = "Effects",
+        .tooltip = "Emissives glow intensity. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxEmissivesGlowContrast",
+        .binding = &shader_injection.Custom_Emissives_Glow_Contrast,
+        .default_value = 50.f,
+        .label = "Emissives Glow Contrast",
+        .section = "Effects",
+        .tooltip = "Emissives glow contrast. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
     new renodx::utils::settings::Setting{
         .key = "FxSkyboxEnableBoost",
         .binding = &shader_injection.Custom_Skybox_EnableBoost,
@@ -490,9 +510,11 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f); 
-        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f); 
+        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
+        renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
+        renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
+        renodx::utils::settings::UpdateSetting("FxEmissivesGlow", 50.f);
+        renodx::utils::settings::UpdateSetting("FxEmissivesGlowContrast", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 15.f);
@@ -522,6 +544,8 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 100.f); 
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 95.f);
+        renodx::utils::settings::UpdateSetting("FxEmissivesGlow", 100.f);
+        renodx::utils::settings::UpdateSetting("FxEmissivesGlowContrast", 95.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
         renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 30.f);
@@ -565,6 +589,8 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
+     renodx::utils::settings::UpdateSetting("FxEmissivesGlow", 50.f);
+     renodx::utils::settings::UpdateSetting("FxEmissivesGlowContrast", 50.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
      renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 15.f);
