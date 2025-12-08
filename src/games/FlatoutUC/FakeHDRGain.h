@@ -1,3 +1,5 @@
+#include "./shared.h"
+
 float3 ApplyFakeHDRGain(float3 color, float gainScale, float threshold, float saturationMultiplier)
 {
     const float EPSILON = 1e-6;
@@ -54,10 +56,19 @@ float3 ApplyFakeHDRGain(float3 color, float gainScale, float threshold, float sa
 
     // --- 6) Soft HDR compression ---
     float maxValueGain = max(max(output.r, output.g), output.b);
-    float headroom = max(1.0, maxValueGain * 5.0);
+    float headroom = max(1.0, maxValueGain * 2.0);
     float compressMul = 1.0 / (1.0 + maxValueGain / (headroom + EPSILON));
     float finalCompressMul = lerp(1.0, compressMul, gainInfluence);
     output *= finalCompressMul;
 
-    return max(output, 0.0);
+    return min(max(output, 0.f), 65504.f);
+}
+
+float ApplyFakeHDRGain(float value, float gainScale, float threshold, float saturationMultiplier)
+{
+    // Treat single float as grayscale
+    float3 gray = float3(value, value, value);
+    float3 boosted = ApplyFakeHDRGain(gray, gainScale, threshold, saturationMultiplier);
+    // Return luminance back as float
+    return dot(boosted, float3(0.2126, 0.7152, 0.0722));
 }

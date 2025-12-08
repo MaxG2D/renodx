@@ -370,7 +370,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Bloom Amount",
         .section = "Effects",
-        .tooltip = "Vanila bloom. Very old-gen style, highly suggested to turn it off completely and use a third party ReShade bloom instead.",
+        .tooltip = "Vanila bloom. Since we unclamp it in HDR, you can set it to very high value to match SDR clipped look",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -390,7 +390,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Contrast Amount",
         .section = "Effects",
-        .tooltip = "Color contrast amount. 63 roughly matches SDR.",    
+        .tooltip = "Color contrast amount. 53 roughly matches SDR in HDR.",    
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -400,7 +400,7 @@ renodx::utils::settings::Settings settings = {
         .default_value = 50.f,
         .label = "Levels Amount",
         .section = "Effects",
-        .tooltip = "Color levels amount. 49 roughly matches SDR.",
+        .tooltip = "Color levels amount. 53 roughly matches SDR in HDR.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -434,7 +434,7 @@ renodx::utils::settings::Settings settings = {
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
-        new renodx::utils::settings::Setting{
+    new renodx::utils::settings::Setting{
         .key = "FxEmissivesGlow",
         .binding = &shader_injection.Custom_Emissives_Glow,
         .default_value = 50.f,
@@ -461,6 +461,36 @@ renodx::utils::settings::Settings settings = {
         .label = "Emissives Glow Saturation",
         .section = "Effects",
         .tooltip = "Emissives glow saturation. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxHeadlightsGlow",
+        .binding = &shader_injection.Custom_Headlights_Glow,
+        .default_value = 50.f,
+        .label = "Headlight Glow Intensity",
+        .section = "Effects",
+        .tooltip = "Headlight glow intensity. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },    
+        new renodx::utils::settings::Setting{
+        .key = "FxHeadlightsGlowContrast",
+        .binding = &shader_injection.Custom_Headlights_Glow_Contrast,
+        .default_value = 50.f,
+        .label = "Headlight Glow Contrast",
+        .section = "Effects",
+        .tooltip = "Headlight glow contrast. 50 is vanilla amount.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "FxHeadlightsGlowSaturation",
+        .binding = &shader_injection.Custom_Headlights_Glow_Saturation,
+        .default_value = 50.f,
+        .label = "Headlight Glow Saturation",
+        .section = "Effects",
+        .tooltip = "Headlight glow saturation. 50 is vanilla amount.",
         .max = 100.f,
         .parse = [](float value) { return value * 0.02f; },
     },
@@ -527,19 +557,22 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
-        renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
+        renodx::utils::settings::UpdateSetting("FxBloomAmount", 300.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
+        renodx::utils::settings::UpdateSetting("FxContrastAmount", 53.f);
+        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 53.f);
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
         renodx::utils::settings::UpdateSetting("FxParticlesGlowSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("FxEmissivesGlow", 50.f);
         renodx::utils::settings::UpdateSetting("FxEmissivesGlowContrast", 50.f);
         renodx::utils::settings::UpdateSetting("FxEmissivesGlowSaturation", 50.f);
+        renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 50.f);
+        renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 50.f);
+        renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 75.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 75.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 90.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f); },
     },
     new renodx::utils::settings::Setting{
@@ -570,9 +603,12 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxEmissivesGlow", 100.f);
         renodx::utils::settings::UpdateSetting("FxEmissivesGlowContrast", 75.f);
         renodx::utils::settings::UpdateSetting("FxEmissivesGlowSaturation", 75.f);
+        renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 80.f);
+        renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 0.f);
+        renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 75.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 75.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 90.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f); },
     },
 };
@@ -617,9 +653,12 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxEmissivesGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxEmissivesGlowContrast", 50.f);
      renodx::utils::settings::UpdateSetting("FxEmissivesGlowSaturation", 50.f);
+     renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 50.f);
+     renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 50.f);
+     renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 75.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 75.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 90.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f);   
 }
 

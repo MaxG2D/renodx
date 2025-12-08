@@ -260,7 +260,9 @@ float4 main(PS_INPUT IN) : COLOR
     emitAlpha = emitAlpha * invFresnel;
 
     float3 emissive = r0.rgb * g_PS_windowEmitColor.rgb;
-    //emissive = ApplyFakeHDRGain(emissive, pow(1.5, 15), pow(1.5, 15), 1.5);
+    if (RENODX_TONE_MAP_TYPE > 0) {
+      emissive = ApplyFakeHDRGain(emissive, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), Custom_Emissives_Glow_Saturation);
+    }
     float3 finalColor = emitAlpha * emissive + combinedColor;
     float finalAlpha = saturate(r1.w * fresnel + specular);
     float3 foggedColor = lerp(finalColor, g_PS_fogColor.rgb, IN.Fog);
