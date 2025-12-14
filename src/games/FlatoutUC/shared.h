@@ -74,22 +74,22 @@ struct ShaderInjectData {
 
   float swap_chain_encoding;
   float swap_chain_encoding_color_space;
+  float Custom_Bloom_Improve;
   float Custom_Bloom_Amount;
+  
   float Custom_Bloom_Tint;
-
   float Custom_Color_Desaturation;
   float Custom_Color_Contrast;
   float Custom_Color_Levels;
-  float Custom_Particles_Glow;
 
+  float Custom_Particles_Glow;
   float Custom_Particles_Glow_Contrast;
   float Custom_Bloom_Threshold;
   float Custom_Bloom_BlurSize;
-  float Custom_Skybox_Intensity;
 
+  float Custom_Skybox_Intensity;
   float Custom_Skybox_Saturation;
   float Custom_Skybox_Contrast;
-  float Custom_Skybox_EnableBoost;
   float Custom_Emissives_Glow;
 
   float Custom_Emissives_Glow_Contrast;
@@ -139,26 +139,26 @@ float4 shader_injection[13] : register(c150);
 #define RENODX_SWAP_CHAIN_CUSTOM_COLOR_SPACE   shader_injection[6][3]
 #define RENODX_SWAP_CHAIN_ENCODING             shader_injection[7][0]
 #define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE shader_injection[7][1]
-#define Custom_Bloom_Amount                    shader_injection[7][2]
-#define Custom_Bloom_Tint                      shader_injection[7][3]
-#define Custom_Color_Desaturation              shader_injection[8][0]
-#define Custom_Color_Contrast                  shader_injection[8][1]
-#define Custom_Color_Levels                    shader_injection[8][2]
-#define Custom_Particles_Glow                  shader_injection[8][3]
-#define Custom_Particles_Glow_Contrast         shader_injection[9][0]
-#define Custom_Bloom_Threshold                 shader_injection[9][1]
-#define Custom_Bloom_BlurSize                  shader_injection[9][2]
-#define Custom_Skybox_Intensity                shader_injection[9][3]
-#define Custom_Skybox_Saturation               shader_injection[10][0]
-#define Custom_Skybox_Contrast                 shader_injection[10][1]
-#define Custom_Skybox_EnableBoost              shader_injection[10][2]
+#define Custom_Bloom_Improve                   shader_injection[7][2]
+#define Custom_Bloom_Amount                    shader_injection[7][3]
+#define Custom_Bloom_Tint                      shader_injection[8][0]
+#define Custom_Color_Desaturation              shader_injection[8][1]
+#define Custom_Color_Contrast                  shader_injection[8][2]
+#define Custom_Color_Levels                    shader_injection[8][3]
+#define Custom_Particles_Glow                  shader_injection[9][0]
+#define Custom_Particles_Glow_Contrast         shader_injection[9][1]
+#define Custom_Bloom_Threshold                 shader_injection[9][2]
+#define Custom_Bloom_BlurSize                  shader_injection[9][3]
+#define Custom_Skybox_Intensity                shader_injection[10][0]
+#define Custom_Skybox_Saturation               shader_injection[10][1]
+#define Custom_Skybox_Contrast                 shader_injection[10][2]
 #define Custom_Emissives_Glow                  shader_injection[10][3]
 #define Custom_Emissives_Glow_Contrast         shader_injection[11][0]
 #define Custom_Emissives_Glow_Saturation       shader_injection[11][1]
 #define Custom_Particles_Glow_Saturation       shader_injection[11][2]
-#define Custom_Headlights_Glow                  shader_injection[11][3]
-#define Custom_Headlights_Glow_Contrast         shader_injection[12][0]
-#define Custom_Headlights_Glow_Saturation       shader_injection[12][1]
+#define Custom_Headlights_Glow                 shader_injection[11][3]
+#define Custom_Headlights_Glow_Contrast        shader_injection[12][0]
+#define Custom_Headlights_Glow_Saturation      shader_injection[12][1]
 
 
 #define RENODX_RENO_DRT_TONE_MAP_METHOD renodx::tonemap::renodrt::config::tone_map_method::REINHARD
@@ -201,6 +201,7 @@ cbuffer shader_injection : register(b13) {
 #define RENODX_SWAP_CHAIN_ENCODING             shader_injection.swap_chain_encoding
 #define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE shader_injection.swap_chain_encoding_color_space
 #define RENODX_RENO_DRT_TONE_MAP_METHOD        renodx::tonemap::renodrt::config::tone_map_method::REINHARD
+#define Custom_Bloom_Improve                   shader_injection.Custom_Bloom_Improve
 #define Custom_Bloom_Amount                    shader_injection.Custom_Bloom_Amount
 #define Custom_Bloom_Tint                      shader_injection.Custom_Bloom_Tint
 #define Custom_Color_Desaturation              shader_injection.Custom_Color_Desaturation
@@ -213,7 +214,6 @@ cbuffer shader_injection : register(b13) {
 #define Custom_Skybox_Intensity                shader_injection.Custom_Skybox_Intensity
 #define Custom_Skybox_Saturation               shader_injection.Custom_Skybox_Saturation
 #define Custom_Skybox_Contrast                 shader_injection.Custom_Skybox_Contrast
-#define Custom_Skybox_EnableBoost              shader_injection.Custom_Skybox_EnableBoost
 #define Custom_Emissives_Glow                  shader_injection.Custom_Emissives_Glow
 #define Custom_Emissives_Glow_Contrast         shader_injection.Custom_Emissives_Glow_Contrast
 #define Custom_Emissives_Glow_Saturation       shader_injection.Custom_Emissives_Glow_Saturation

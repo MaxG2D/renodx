@@ -345,6 +345,18 @@ renodx::utils::settings::Settings settings = {
         .is_visible = []() { return current_settings_mode >= 2; },
     },
     new renodx::utils::settings::Setting{
+        .key = "FxBloomImprove",
+        .binding = &shader_injection.Custom_Bloom_Improve,
+        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+        .default_value = 0.f,
+        .label = "Improved Bloom rendering",
+        .section = "Effects",
+        .tooltip = "Improves bloom quality by changing the rendering order in the output shader.",
+        .labels = {"Disable bloom improvements", "Enable bloom improvements"},
+        .max = 1.f,
+        .parse = [](float value) { return value; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "FxBloomThreshold",
         .binding = &shader_injection.Custom_Bloom_Threshold,
         .default_value = 50.f,
@@ -495,37 +507,23 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
-        .key = "FxSkyboxEnableBoost",
-        .binding = &shader_injection.Custom_Skybox_EnableBoost,
-        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 0.f,
-        .label = "Enable Skybox Boost",
-        .section = "Effects",
-        .tooltip = "Enables HDR boost for skybox rendering.",
-        .labels = {"Disable Skybox Boost", "Enable Skybox Boost"},
-        .max = 1.f,
-        .parse = [](float value) { return value; },
-    },
-    new renodx::utils::settings::Setting{
         .key = "FxSkyboxIntensity",
         .binding = &shader_injection.Custom_Skybox_Intensity,
-        .default_value = 75.f,
+        .default_value = 70.f,
         .label = "Skybox Boost Intensity",
         .section = "Effects",
         .tooltip = "Skybox HDR boost intensity multiplier.",
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.Custom_Skybox_EnableBoost >= 1; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "FxSkyboxContrast",
         .binding = &shader_injection.Custom_Skybox_Contrast,
-        .default_value = 75.f,
+        .default_value = 63.f,
         .label = "Skybox Boost Contrast",
         .section = "Effects",
         .tooltip = "Skybox HDR boost contrast multiplier.",
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.Custom_Skybox_EnableBoost >= 1; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -536,7 +534,6 @@ renodx::utils::settings::Settings settings = {
         .section = "Effects",
         .tooltip = "Skybox HDR boost saturation multiplier.",
         .max = 100.f,
-        .is_enabled = []() { return shader_injection.Custom_Skybox_EnableBoost >= 1; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -555,12 +552,13 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+        renodx::utils::settings::UpdateSetting("FxBloomImprove", 0);
         renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
-        renodx::utils::settings::UpdateSetting("FxBloomAmount", 300.f);
+        renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxDesaturationAmount", 50.f);
-        renodx::utils::settings::UpdateSetting("FxContrastAmount", 53.f);
-        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 53.f);
+        renodx::utils::settings::UpdateSetting("FxContrastAmount", 50.f);
+        renodx::utils::settings::UpdateSetting("FxLevelsAmount", 50.f);
         renodx::utils::settings::UpdateSetting("FxParticlesGlow", 50.f);
         renodx::utils::settings::UpdateSetting("FxParticlesGlowContrast", 50.f);
         renodx::utils::settings::UpdateSetting("FxParticlesGlowSaturation", 50.f);
@@ -570,9 +568,8 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 50.f);
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 50.f);
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 90.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 70.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 63.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f); },
     },
     new renodx::utils::settings::Setting{
@@ -591,6 +588,7 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
         renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+        renodx::utils::settings::UpdateSetting("FxBloomImprove", 1);
         renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
         renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 100.f);
         renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
@@ -606,9 +604,8 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 80.f);
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 0.f);
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 1); 
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 90.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 70.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 63.f); 
         renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f); },
     },
 };
@@ -641,6 +638,7 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
      renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
      renodx::utils::settings::UpdateSetting("colorGradeLUTStrength", 100.f);
+     renodx::utils::settings::UpdateSetting("FxBloomImprove", 0);
      renodx::utils::settings::UpdateSetting("FxBloomThreshold", 50.f);
      renodx::utils::settings::UpdateSetting("FxBloomBlurSize", 50.f);
      renodx::utils::settings::UpdateSetting("FxBloomAmount", 50.f);
@@ -656,9 +654,8 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 50.f);
      renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxEnableBoost", 0);
-     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 100.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 90.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 70.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 63.f);
      renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f);   
 }
 

@@ -31,7 +31,7 @@ float4 main(PS_INPUT input) : COLOR
     float3 C_prime_sky = K * (C_fog - C_sky) + C_sky;
     float3 finalColor = r0.x * (C_sky - C_prime_sky) + C_prime_sky;
 
-    if (Custom_Skybox_EnableBoost > 0 && RENODX_TONE_MAP_TYPE > 0.f) 
+    if (RENODX_TONE_MAP_TYPE > 0.f) 
     {
       /* Old Boost Code
       float finalLuma = dot(finalColor, lumaWeights);

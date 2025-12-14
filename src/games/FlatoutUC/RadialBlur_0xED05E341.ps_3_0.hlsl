@@ -9,7 +9,7 @@ sampler2D s1 : register( s1 );
 sampler2D SceneDepthMap : register( s12 );
 float4 g_PS_depthBufferScale : register( c52 ); 
 
-static const int TOTAL_SAMPLES = 64;
+static const int TOTAL_SAMPLES = 32;
 static const float INV_SAMPLE_COUNT = 1.0f / (float)(TOTAL_SAMPLES); 
 static const float HALF_FLOAT = 0.5;
 

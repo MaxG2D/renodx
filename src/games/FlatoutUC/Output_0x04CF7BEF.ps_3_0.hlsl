@@ -39,7 +39,9 @@ float4 main(PS_INPUT input) : COLOR
     float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
 
     // Moved Bloom at the start of the pipieline in untonemapped compared to vanilla to avoid clipping issues
-    float3 linearWithBloom = exposuremultipliedLinearColor.rgb + (bloomColor.rgb * g_BloomTint.rgb * Custom_Bloom_Amount);
+
+    float3 bloomRaw = bloomColor.rgb * g_BloomTint.rgb * Custom_Bloom_Amount;
+    float3 linearWithBloom = exposuremultipliedLinearColor.rgb + (bloomRaw);
     float preLUT_luma = dot(linearWithBloom, LUMA_WEIGHTS);
 
     // Tonemapping Configuration required for ACES
@@ -65,15 +67,14 @@ float4 main(PS_INPUT input) : COLOR
     gradedColor.b = tex2D(TextureGrading, float2(lutUV.b, LUT_V_COORD)).r;
     gradedColor = pow(gradedColor, g_CurveParams.x);
     float3 GammaColor = gradedColor;
-    float postLUT_luma = dot(GammaColor + bloomColor.rgb * g_BloomTint.rgb, LUMA_WEIGHTS);
+    float postLUT_luma = dot(GammaColor + bloomColor.rgb * g_BloomTint.rgb * Custom_Bloom_Amount, LUMA_WEIGHTS);
     float lutRatio = saturate(postLUT_luma / preLUT_luma);
 
     // Add Bloom
     float3 colorWithBloom;
     float3 bloomAdjusted;
 
-    if (RENODX_TONE_MAP_TYPE > 0.f) {
-      //colorWithBloom = GammaColor + bloomAdjusted;
+    if (Custom_Bloom_Improve != 0) {
       colorWithBloom = GammaColor;
     } else {
       bloomAdjusted = bloomColor.rgb * g_BloomTint.rgb;
@@ -135,25 +136,23 @@ float4 main(PS_INPUT input) : COLOR
     float3 prefinalcolor; 
     prefinalcolor = levelsDiff * (levelsScale) + 0.5f;
 
-    if (RENODX_TONE_MAP_TYPE > 0.f) {
-    // Move bloom down to the very end of the pipeline to avoid it getting griefed by various post processing effects
-    // Still, some grading needs to be applied to bloom to match vanilla luminance levels.
-    float3 bloomLinear = bloomColor.rgb * g_BloomTint.rgb;
-    bloomLinear = pow(max(bloomLinear, 0.f), g_CurveParams.x);
-    float3 bloomLinearPreBleach = pow(max(bloomLinear, 0.f), g_BleachParams.z);
-    
-    // No desaturation on bloom, it effectively causes double desaturation. Sad consequence of fixing the cursed pipeline of vanilla game :(
-    //float3 bleachedBloom = lerp(bloomLinearPreBleach, bleachSample, g_BleachParams.y * Custom_Color_Desaturation);
+    if (Custom_Bloom_Improve != 0) {
+      // Move bloom down to the very end of the pipeline to avoid it getting griefed by various post processing effects
+      // Still, some grading needs to be applied to bloom to match vanilla luminance levels.
+      float3 bloomLinear = bloomColor.rgb * g_BloomTint.rgb * Custom_Bloom_Amount;
+      bloomLinear = pow(max(bloomLinear, 0.f), g_CurveParams.x);
+      bloomLinear = pow(max(bloomLinear, 0.f), g_BleachParams.z);
 
-    // We want the bloom to stay linear, but luminance curve needs to match vanilla
-    float3 expBloom = bloomLinearPreBleach * 1/g_BleachParams.w;
-    bloomAdjusted = expBloom;
-    bloomAdjusted = renodx::color::srgb::Decode(bloomAdjusted);
+      // No desaturation on bloom, it effectively causes double desaturation. Sad consequence of fixing the cursed pipeline of vanilla game :(
+      //bloomLinearPreBleach = lerp(bloomLinearPreBleach, bleachSample, g_BleachParams.y * Custom_Color_Desaturation);
 
-    // Scaling bloom amount based on luminance difference between the pre and post graded image to avoid overbrightening
-    bloomAdjusted *= lutRatio;
-    bloomAdjusted *= Custom_Bloom_Amount;
-    prefinalcolor += bloomAdjusted;
+      // We want the bloom to stay linear, but luminance curve needs to match vanilla
+      float3 bloomAdjusted = bloomLinear * 1 / g_BleachParams.w;
+      bloomAdjusted = lerp(bloomAdjusted, bloomAdjusted * lutRatio, saturate(preLUT_luma));  // Custom to reduce the excessive clipping from vanilla post process
+      // Scaling bloom amount based on luminance difference between the pre and post graded image to avoid overbrightening
+      bloomAdjusted *= lutRatio;
+      bloomAdjusted = renodx::color::srgb::Decode(bloomAdjusted);
+      prefinalcolor += bloomAdjusted;
     }
 
     float3 finalcolorSDR = prefinalcolor;
