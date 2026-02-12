@@ -5,6 +5,8 @@
 
 #define ImTextureID ImU64
 
+#define DEBUG_LEVEL_0
+#define DEBUG_LEVEL_1
 #define DEBUG_LEVEL_2
 
 #include <windows.h>
@@ -22,7 +24,10 @@
 #include <embed/shaders.h>
 
 #include "../../mods/shader.hpp"
+
+#define RENODX_MODS_SWAPCHAIN_VERSION 2
 #include "../../mods/swapchain.hpp"
+
 #include "../../utils/random.hpp"
 #include "../../utils/settings.hpp"
 #include "../../utils/vtable.hpp"
@@ -607,7 +612,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
         renodx::mods::shader::allow_multiple_push_constants = true;
 
         renodx::mods::swapchain::SetUseHDR10(false);
-        renodx::mods::swapchain::prevent_full_screen = false;
+        renodx::mods::swapchain::prevent_full_screen = true;
         renodx::mods::swapchain::force_borderless = true;
         renodx::mods::swapchain::swapchain_proxy_revert_state = true;
         renodx::mods::swapchain::use_auto_upgrade = false;
@@ -617,7 +622,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
         renodx::mods::swapchain::force_screen_tearing = false;
         //renodx::mods::swapchain::device_proxy_wait_idle_source = true;
         //renodx::mods::swapchain::device_proxy_wait_idle_destination = true;
-        renodx::mods::swapchain::swapchain_proxy_compatibility_mode = true;
+        renodx::mods::swapchain::swapchain_proxy_compatibility_mode = false;
         renodx::mods::swapchain::swap_chain_proxy_shaders = {
             {
                 reshade::api::device_api::d3d11,
