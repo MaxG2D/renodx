@@ -313,7 +313,77 @@ renodx::utils::settings::Settings settings = {
         .is_enabled = []() { return shader_injection.tone_map_type > 0; },
         .parse = [](float value) { return value * 0.01f; },
         //.is_visible = []() { return current_settings_mode >= 2; },
-        .is_visible = []() { return false; },
+        //.is_visible = []() { return false; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "AABlurStrength",
+        .binding = &shader_injection.custom_AA_blur_strength,
+        .default_value = 50.f,
+        .label = "AA Blur Strength",
+        .section = "Game FX",
+        .tooltip = "Adjusts the strength of the anti-aliasing blur. Higher values can help reduce shimmering at the cost of image sharpness.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "Bloom Amount",
+        .binding = &shader_injection.custom_bloom_amount,
+        .default_value = 50.f,
+        .label = "Bloom Amount",
+        .section = "Game FX",
+        .tooltip = "Adjusts the intensity of the bloom effect.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "Bloom Radius",
+        .binding = &shader_injection.custom_bloom_radius,
+        .default_value = 50.f,
+        .label = "Bloom Radius",
+        .section = "Game FX",
+        .tooltip = "Adjusts the radius of the bloom effect.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "ChromacityEffectsStrength",
+        .binding = &shader_injection.custom_chromacity_effects_strength,
+        .default_value = 50.f,
+        .label = "Chromacity Effects Strength",
+        .section = "Game FX",
+        .tooltip = "Game applies general desaturation and actually increases saturation in certain moments. With this, you can completely nullify this.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "CloudsGlow",
+        .binding = &shader_injection.custom_clouds_glow,
+        .default_value = 50.f,
+        .label = "Clouds Glow",
+        .section = "Game FX - Sky",
+        .tooltip = "HDR intensity boost of clouds.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "CloudsGlowContrast",
+        .binding = &shader_injection.custom_clouds_glow_contrast,
+        .default_value = 50.f,
+        .label = "Clouds Glow Contrast",
+        .section = "Game FX - Sky",
+        .tooltip = "Contrast adjustment for clouds glow.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
+        .key = "CloudsGlowSaturation",
+        .binding = &shader_injection.custom_clouds_glow_saturation,
+        .default_value = 50.f,
+        .label = "Clouds Glow Saturation",
+        .section = "Game FX - Sky",
+        .tooltip = "Saturation adjustment for clouds glow.",
+        .max = 100.f,
+        .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
         .key = "SwapChainCustomColorSpace",
@@ -406,13 +476,19 @@ renodx::utils::settings::Settings settings = {
         .on_change = []() {
           renodx::utils::settings::ResetSettings();
           renodx::utils::settings::UpdateSettings({
-            {"tonemapGameNits", 203.f},
             {"colorGradeExposure", 1.f},
             {"colorGradeHighlights", 50.f},
             {"colorGradeShadows", 50.f},
             {"colorGradeContrast", 50.f},
             {"colorGradeSaturation", 50.f},
-            {"ColorGradeHighlightSaturation", 45.f},
+            {"ColorGradeHighlightSaturation", 50.f},
+            {"AABlurStrength", 50.f},
+            {"Bloom Amount", 50.f},
+            {"Bloom Radius", 50.f},
+            {"ChromacityEffectsStrength", 50.f},
+            {"CloudsGlow", 50.f},
+            {"CloudsGlowContrast", 50.f},
+            {"CloudsGlowSaturation", 50.f},
           });
         },
     },
@@ -465,7 +541,6 @@ void OnPresetOff() {
     renodx::utils::settings::UpdateSetting("toneMapPeakNits", 203.f);
     renodx::utils::settings::UpdateSetting("toneMapGameNits", 203.f);
     renodx::utils::settings::UpdateSetting("toneMapUINits", 203.f);
-    renodx::utils::settings::UpdateSetting("HDRVideos", 0.f);
     renodx::utils::settings::UpdateSetting("toneMapGammaCorrection", 0);
     renodx::utils::settings::UpdateSetting("colorGradeExposure", 1.f);
     renodx::utils::settings::UpdateSetting("colorGradeHighlights", 50.f);
@@ -473,6 +548,13 @@ void OnPresetOff() {
     renodx::utils::settings::UpdateSetting("colorGradeContrast", 50.f);
     renodx::utils::settings::UpdateSetting("colorGradeSaturation", 50.f);
     renodx::utils::settings::UpdateSetting("ColorGradeHighlightSaturation", 50.f);
+    renodx::utils::settings::UpdateSetting("AABlurStrength", 50.f);
+    renodx::utils::settings::UpdateSetting("Bloom Amount", 50.f);
+    renodx::utils::settings::UpdateSetting("Bloom Radius", 50.f);
+    renodx::utils::settings::UpdateSetting("ChromacityEffectsStrength", 50.f);
+    renodx::utils::settings::UpdateSetting("CloudsGlow", 50.f);
+    renodx::utils::settings::UpdateSetting("CloudsGlowContrast", 50.f);
+    renodx::utils::settings::UpdateSetting("CloudsGlowSaturation", 50.f);
 }
 
 const auto UPGRADE_TYPE_NONE = 0.f;
