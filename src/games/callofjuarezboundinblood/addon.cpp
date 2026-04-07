@@ -5,9 +5,9 @@
 
 #define ImTextureID ImU64
 
-#define DEBUG_LEVEL_0
-#define DEBUG_LEVEL_1
-#define DEBUG_LEVEL_2
+// #define DEBUG_LEVEL_0
+// #define DEBUG_LEVEL_1
+// #define DEBUG_LEVEL_2
 
 #include <windows.h>
 
@@ -449,10 +449,10 @@ const std::unordered_map<std::string, reshade::api::format> UPGRADE_TARGETS = {
     // {"R8G8B8A8_TYPELESS", reshade::api::format::r8g8b8a8_typeless},
     // {"B8G8R8A8_TYPELESS", reshade::api::format::b8g8r8a8_typeless},
     {"R8G8B8A8_UNORM", reshade::api::format::r8g8b8a8_unorm},
-    // {"B8G8R8A8_UNORM", reshade::api::format::b8g8r8a8_unorm},
-    // {"R8G8B8A8_SNORM", reshade::api::format::r8g8b8a8_snorm},
-    // {"R8G8B8A8_UNORM_SRGB", reshade::api::format::r8g8b8a8_unorm_srgb},
-    // {"B8G8R8A8_UNORM_SRGB", reshade::api::format::b8g8r8a8_unorm_srgb},
+    {"B8G8R8A8_UNORM", reshade::api::format::b8g8r8a8_unorm},
+    {"R8G8B8A8_SNORM", reshade::api::format::r8g8b8a8_snorm},
+    {"R8G8B8A8_UNORM_SRGB", reshade::api::format::r8g8b8a8_unorm_srgb},
+    {"B8G8R8A8_UNORM_SRGB", reshade::api::format::b8g8r8a8_unorm_srgb},
     // {"R10G10B10A2_TYPELESS", reshade::api::format::r10g10b10a2_typeless},
     // {"R10G10B10A2_UNORM", reshade::api::format::r10g10b10a2_unorm},
     // {"B10G10R10A2_UNORM", reshade::api::format::b10g10r10a2_unorm},
@@ -721,7 +721,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
           auto* setting = new renodx::utils::settings::Setting{
               .key = "Upgrade_" + key,
               .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-              .default_value = 3.f,
+              .default_value = 2.f,
               .label = key,
               .section = "Resource Upgrades",
               .labels = {
