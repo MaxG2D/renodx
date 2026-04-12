@@ -568,9 +568,9 @@ renodx::utils::settings::Settings settings = {
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 50.f);
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 50.f);
         renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 70.f);
-        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 63.f); 
-        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f); },
+        renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
+        renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 50.f); 
+        renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 50.f); },
     },
     new renodx::utils::settings::Setting{
     .value_type = renodx::utils::settings::SettingValueType::BUTTON,
@@ -654,9 +654,9 @@ void OnPresetOff() {
      renodx::utils::settings::UpdateSetting("FxHeadlightsGlow", 50.f);
      renodx::utils::settings::UpdateSetting("FxHeadlightsGlowContrast", 50.f);
      renodx::utils::settings::UpdateSetting("FxHeadlightsGlowSaturation", 50.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 70.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 63.f);
-     renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 65.f);   
+     renodx::utils::settings::UpdateSetting("FxSkyboxIntensity", 50.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxContrast", 50.f);
+     renodx::utils::settings::UpdateSetting("FxSkyboxSaturation", 50.f);   
 }
 
 const auto UPGRADE_TYPE_NONE = 0.f;

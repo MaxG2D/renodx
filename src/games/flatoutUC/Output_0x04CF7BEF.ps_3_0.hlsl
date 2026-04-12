@@ -1,4 +1,4 @@
-//#include "../../shaders/tonemap.hlsl"
+#include "../../shaders/tonemap.hlsl"
 #include "./shared.h"
 
 
@@ -36,6 +36,7 @@ float4 main(PS_INPUT input) : COLOR
     float4 bloomColor   = tex2D(TextureBloom, input.uv);
 
     float3 composition = overlayColor.w * baseColor.rgb + overlayColor.rgb;
+    //float3 composition = baseColor.rgb;
     float3 exposuremultipliedLinearColor = composition.rgb * exposure.x;
 
     // Moved Bloom at the start of the pipieline in untonemapped compared to vanilla to avoid clipping issues
@@ -162,26 +163,28 @@ float4 main(PS_INPUT input) : COLOR
     untonemapped = pow(max(untonemapped, 0.f), g_CurveParams.x);
     untonemapped = pow(max(untonemapped, 0.f), g_BleachParams.z);
     untonemapped = untonemapped * 1/g_BleachParams.w;
-    untonemapped = renodx::color::srgb::Decode(untonemapped);
-    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemapped);
+    float3 untonemappedDecoded = renodx::color::srgb::Decode(untonemapped);
+    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemappedDecoded);
 
-    if (RENODX_TONE_MAP_TYPE > 0.f && RENODX_TONE_MAP_TYPE != 2.f) {
-      o.rgb = renodx::draw::ToneMapPass(untonemapped, finalcolorSDR, tonemapped);
+    if (RENODX_TONE_MAP_TYPE == 1.f || RENODX_TONE_MAP_TYPE == 3.f) {
+      o.rgb = renodx::draw::ToneMapPass(untonemappedDecoded, finalcolorSDR, tonemapped);
     } else if (RENODX_TONE_MAP_TYPE == 0.f){
       o.rgb = finalcolorSDRVanilla.xyz;
-    } else if (RENODX_TONE_MAP_TYPE == 2.f) {
-      untonemapped = renodx::color::grade::UserColorGrading(
-          untonemapped,
-          config.exposure,
-          config.highlights,
-          config.shadows,
-          config.contrast,
-          config.saturation);
-      float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config);
-      float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemapped, config, true);
-      Acestonemapped = saturate(Acestonemapped);
+    } else if (RENODX_TONE_MAP_TYPE == 2.f && config.type == 2.f) {
+      /*       untonemapped = renodx::color::grade::UserColorGrading(
+                untonemapped,
+                config.exposure,
+                config.highlights,
+                config.shadows,
+                config.contrast,
+                config.saturation); */
+      // untonemapped = renodx::tonemap::config::Apply(untonemapped, config);
+      float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemappedDecoded, config);
+      // float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemappedDecoded, config, true);
+      float3 Acestonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemappedDecoded);
+      // Acestonemapped = saturate(Acestonemapped);
       o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
-      o.rgb = Acestonemapped;
+      //o.rgb = AcesUntonemapped;
     }
 
     o.a = renodx::color::y::from::BT709(o.rgb);

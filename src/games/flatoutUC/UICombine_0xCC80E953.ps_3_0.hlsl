@@ -1,7 +1,6 @@
-// ------------------------------------------------------------------
-// UI/Particle Modulation Shader
-// ------------------------------------------------------------------
+#include "./shared.h"
 
+// UI/Particle Modulation Shader
 sampler2D Tex0 : register(s0);
 
 struct PS_IN
@@ -15,9 +14,8 @@ float4 main(PS_IN input) : COLOR
 {
     // Sample the texture (texld r0, v1, s0)
     float4 TextureColor = tex2D(Tex0, input.texcoord);
-    
+
     // Multiply the texture color by the vertex color (mul oC0, r0, v0)
     float4 OutputColor = TextureColor * input.color;
-
-    return OutputColor;
+    return OutputColor * (RENODX_GRAPHICS_WHITE_NITS / RENODX_DIFFUSE_WHITE_NITS);
 }
