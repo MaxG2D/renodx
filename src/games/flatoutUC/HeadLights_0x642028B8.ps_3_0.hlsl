@@ -1,5 +1,5 @@
 #include "./shared.h"
-#include "./FakeHDRGain.h"
+#include "./FakeHDRGain.hlsl"
 
 // Car headlights shader
 
@@ -239,7 +239,7 @@ float4 main(PSInput input) : COLOR
   r2.x = exp(r0.y); r2.y = exp(r0.z); r2.z = exp(r0.w);
   if (RENODX_TONE_MAP_TYPE > 0)
   {
-    r2.xyz = ApplyFakeHDRGain(r2.xyz, pow(Custom_Headlights_Glow, 15), pow(Custom_Headlights_Glow_Contrast, 15), Custom_Headlights_Glow_Saturation);
+    r2.xyz = FakeHDRGain::Apply(r2.xyz, pow(Custom_Headlights_Glow, 15), pow(Custom_Headlights_Glow_Contrast, 15), Custom_Headlights_Glow_Saturation);
   }
   r0.xyz = r0.x * r2.xyz;
 

@@ -1,5 +1,5 @@
 #include "./shared.h"
-#include "./FakeHDRGain.h"
+#include "./FakeHDRGain.hlsl"
 
 // Buildings with emissive windows shader
 
@@ -261,7 +261,7 @@ float4 main(PS_INPUT IN) : COLOR
 
     float3 emissive = r0.rgb * g_PS_windowEmitColor.rgb;
     if (RENODX_TONE_MAP_TYPE > 0) {
-      emissive = ApplyFakeHDRGain(emissive, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), Custom_Emissives_Glow_Saturation);
+      emissive = FakeHDRGain::Apply(emissive, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), Custom_Emissives_Glow_Saturation);
     }
     float3 finalColor = emitAlpha * emissive + combinedColor;
     float finalAlpha = saturate(r1.w * fresnel + specular);

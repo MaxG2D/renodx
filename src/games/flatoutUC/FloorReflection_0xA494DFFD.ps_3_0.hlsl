@@ -1,5 +1,5 @@
 #include "./shared.h"
-#include "./FakeHDRGain.h"
+#include "./FakeHDRGain.hlsl"
 
 // --- Constants and Resources ---
 
@@ -101,7 +101,7 @@ float4 main(PS_INPUT input) : COLOR
     // Calculate Emissive Color: TextureRGB * EmissiveLightColor
     float3 emissiveColor = baseTexture.xyz * g_PS_windowEmitColor.xyz;  // r1.yzw
     if (RENODX_TONE_MAP_TYPE > 0) {
-      emissiveColor = ApplyFakeHDRGain(emissiveColor, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), Custom_Emissives_Glow_Saturation);
+      emissiveColor = FakeHDRGain::Apply(emissiveColor, pow(Custom_Emissives_Glow, 15), pow(Custom_Emissives_Glow_Contrast, 15), Custom_Emissives_Glow_Saturation);
     }
     float finalEmissiveBlendFactor = opacityFactor * emissiveMask;
 

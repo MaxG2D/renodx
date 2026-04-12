@@ -45,21 +45,6 @@ float4 main(PS_INPUT input) : COLOR
     float3 linearWithBloom = exposuremultipliedLinearColor.rgb + (bloomRaw);
     float preLUT_luma = dot(linearWithBloom, LUMA_WEIGHTS);
 
-    // Tonemapping Configuration required for ACES
-    renodx::tonemap::Config config = renodx::tonemap::config::Create();
-    config.type = RENODX_TONE_MAP_TYPE;
-    config.peak_nits = RENODX_PEAK_WHITE_NITS;
-    config.game_nits = RENODX_DIFFUSE_WHITE_NITS;
-    config.gamma_correction = RENODX_GAMMA_CORRECTION;
-    config.exposure = RENODX_TONE_MAP_EXPOSURE;
-    config.highlights = RENODX_TONE_MAP_HIGHLIGHTS;
-    config.shadows = RENODX_TONE_MAP_SHADOWS;
-    config.contrast = RENODX_TONE_MAP_CONTRAST;
-    config.saturation = RENODX_TONE_MAP_SATURATION;
-    config.mid_gray_value = 0.18;
-    config.mid_gray_nits = 0.18 * 100.f;
-    config.reno_drt_dechroma = RENODX_TONE_MAP_BLOWOUT;
-
     // Color Grading
     float3 gradedColor = exposuremultipliedLinearColor;
     float3 lutUV = exposuremultipliedLinearColor * g_CurveParams.y + LUT_OFFSET;
@@ -164,31 +149,19 @@ float4 main(PS_INPUT input) : COLOR
     untonemapped = pow(max(untonemapped, 0.f), g_BleachParams.z);
     untonemapped = untonemapped * 1/g_BleachParams.w;
     float3 untonemappedDecoded = renodx::color::srgb::Decode(untonemapped);
-    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemappedDecoded);
+    float3 tonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemappedDecoded, true);
 
-    if (RENODX_TONE_MAP_TYPE == 1.f || RENODX_TONE_MAP_TYPE == 3.f) {
-      o.rgb = renodx::draw::ToneMapPass(untonemappedDecoded, finalcolorSDR, tonemapped);
-    } else if (RENODX_TONE_MAP_TYPE == 0.f){
+    if (RENODX_TONE_MAP_TYPE == 0.f) {   
       o.rgb = finalcolorSDRVanilla.xyz;
-    } else if (RENODX_TONE_MAP_TYPE == 2.f && config.type == 2.f) {
-      /*       untonemapped = renodx::color::grade::UserColorGrading(
-                untonemapped,
-                config.exposure,
-                config.highlights,
-                config.shadows,
-                config.contrast,
-                config.saturation); */
-      // untonemapped = renodx::tonemap::config::Apply(untonemapped, config);
-      float3 AcesUntonemapped = renodx::tonemap::config::ApplyACES(untonemappedDecoded, config);
-      // float3 Acestonemapped = renodx::tonemap::config::ApplyACES(untonemappedDecoded, config, true);
-      float3 Acestonemapped = renodx::tonemap::renodrt::NeutralSDR(untonemappedDecoded);
-      // Acestonemapped = saturate(Acestonemapped);
-      o.rgb = renodx::tonemap::UpgradeToneMap(AcesUntonemapped, Acestonemapped, finalcolorSDR, RENODX_COLOR_GRADE_STRENGTH);
-      //o.rgb = AcesUntonemapped;
+    } else if (RENODX_TONE_MAP_TYPE > 1.f) {
+      o.rgb = untonemappedDecoded;
+    } else if (RENODX_TONE_MAP_TYPE == 1.f) {
+      o.rgb = renodx::draw::ToneMapPass(untonemappedDecoded, finalcolorSDR, tonemapped);
     }
-
     o.a = renodx::color::y::from::BT709(o.rgb);
     o.rgb = renodx::draw::RenderIntermediatePass(o.rgb);
+    //o.rgb = renodx::color::srgb::DecodeSafe(o.rgb);
+    //o.rgb = renodx::color::correct::GammaSafe(o.rgb, false, 2.2f);
 
     return float4(o.rgb, o.a);
 }
