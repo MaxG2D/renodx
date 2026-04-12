@@ -10,6 +10,8 @@
 // #define DEBUG_LEVEL_2
 
 #include <windows.h>
+#include <chrono>
+#include <random>
 
 #include <deps/imgui/imgui.h>
 #include <excpt.h>
@@ -39,7 +41,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     // CustomShaderEntry(0x00000000),
     // CustomSwapchainShader(0x00000000),
     // BypassShaderEntry(0x00000000),
-    //__ALL_CUSTOM_SHADERS
+    __ALL_CUSTOM_SHADERS
 };
 
 ShaderInjectData shader_injection;
@@ -663,6 +665,7 @@ extern "C" __declspec(dllexport) void AddonInit(HMODULE addon_module, HMODULE re
   renodx::mods::swapchain::Use(DLL_PROCESS_ATTACH, &shader_injection);
   renodx::mods::shader::Use(DLL_PROCESS_ATTACH, custom_shaders, &shader_injection);
   renodx::utils::random::Use(DLL_PROCESS_ATTACH);
+  renodx::utils::constants::Use(DLL_PROCESS_ATTACH);
   reshade::register_event<reshade::addon_event::present>(OnPresent);
 }
 
@@ -673,6 +676,7 @@ extern "C" __declspec(dllexport) void AddonUninit(HMODULE addon_module, HMODULE 
   renodx::mods::swapchain::Use(DLL_PROCESS_DETACH, &shader_injection);
   renodx::mods::shader::Use(DLL_PROCESS_DETACH, custom_shaders, &shader_injection);
   renodx::utils::random::Use(DLL_PROCESS_DETACH);
+  renodx::utils::constants::Use(DLL_PROCESS_DETACH);
   reshade::unregister_event<reshade::addon_event::present>(OnPresent);
   reshade::unregister_addon(addon_module);
   addon_registered = false;
@@ -688,20 +692,26 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
         renodx::mods::swapchain::ignored_window_class_names = {
             "SplashScreenClass",
         };
+
+        renodx::utils::constants::capture_constant_buffers = true;
+        renodx::utils::constants::capture_push_descriptors = true;
         renodx::mods::shader::force_pipeline_cloning = true;
-        renodx::mods::shader::expected_constant_buffer_space = 50;
+        //renodx::mods::shader::constant_buffer_offset = 50;
+        renodx::mods::shader::expected_constant_buffer_space = 150;
         renodx::mods::shader::expected_constant_buffer_index = 13;
-        renodx::mods::shader::allow_multiple_push_constants = true;
+        renodx::mods::swapchain::expected_constant_buffer_index = 13;
+        renodx::mods::swapchain::expected_constant_buffer_space = 150;
+        renodx::mods::swapchain::use_resource_cloning = true;
+        renodx::mods::shader::revert_constant_buffer_ranges = true;
+        renodx::mods::shader::allow_multiple_push_constants = false;
 
         renodx::mods::swapchain::SetUseHDR10(false);
         renodx::mods::swapchain::prevent_full_screen = true;
         renodx::mods::swapchain::force_borderless = true;
         renodx::mods::swapchain::swapchain_proxy_revert_state = true;
         renodx::mods::swapchain::use_auto_upgrade = false;
-        renodx::mods::swapchain::expected_constant_buffer_index = 13;
-        renodx::mods::swapchain::expected_constant_buffer_space = 50;
-        renodx::mods::swapchain::use_resource_cloning = true;
         renodx::mods::swapchain::force_screen_tearing = false;
+        //renodx::mods::swapchain::swapchain_proxy_revert_state = true;
         //renodx::mods::swapchain::device_proxy_wait_idle_source = true;
         //renodx::mods::swapchain::device_proxy_wait_idle_destination = true;
         renodx::mods::swapchain::swapchain_proxy_compatibility_mode = false;
@@ -908,7 +918,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
 
   renodx::utils::settings::Use(fdw_reason, &settings, &OnPresetOff);
   renodx::mods::swapchain::Use(fdw_reason, &shader_injection);
-  //renodx::mods::shader::Use(fdw_reason, custom_shaders, &shader_injection);
+  renodx::mods::shader::Use(fdw_reason, custom_shaders, &shader_injection);
 
   return TRUE;
 }

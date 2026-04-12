@@ -50,13 +50,14 @@ struct ShaderInjectData {
   float custom_clouds_glow_contrast;
 
   float custom_clouds_glow_saturation;
+  float custom_random;
 
 };
 
 #ifndef __cplusplus
 #if (__SHADER_TARGET_MAJOR == 3)
 
-float4 shader_injection[10] : register(c50);
+float4 shader_injection[10] : register(c150);
 
 #define RENODX_PEAK_WHITE_NITS                    shader_injection[0][0]
 #define RENODX_DIFFUSE_WHITE_NITS                 shader_injection[0][1]
@@ -79,15 +80,15 @@ float4 shader_injection[10] : register(c50);
 #define RENODX_TONE_MAP_HUE_PROCESSOR             shader_injection[4][2]
 #define RENODX_TONE_MAP_PER_CHANNEL               shader_injection[4][3]
 #define RENODX_GAMMA_CORRECTION                   shader_injection[5][0]
-// #define RENODX_INTERMEDIATE_SCALING            shader_injection[5][1]
-#define RENODX_INTERMEDIATE_ENCODING              shader_injection[5][2]
-#define RENODX_INTERMEDIATE_COLOR_SPACE           shader_injection[5][3]
-#define RENODX_SWAP_CHAIN_DECODING                shader_injection[6][0]
-#define RENODX_SWAP_CHAIN_GAMMA_CORRECTION        shader_injection[6][1]
-#define RENODX_SWAP_CHAIN_CLAMP_COLOR_SPACE       shader_injection[6][2]
-#define RENODX_SWAP_CHAIN_CUSTOM_COLOR_SPACE      shader_injection[6][3]
-#define RENODX_SWAP_CHAIN_ENCODING                shader_injection[7][0]
-#define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE    shader_injection[7][1]
+#define RENODX_INTERMEDIATE_ENCODING              shader_injection[5][1]
+#define RENODX_INTERMEDIATE_COLOR_SPACE           shader_injection[5][2]
+#define RENODX_SWAP_CHAIN_DECODING                shader_injection[5][3]
+#define RENODX_SWAP_CHAIN_GAMMA_CORRECTION        shader_injection[6][0]
+#define RENODX_SWAP_CHAIN_CLAMP_COLOR_SPACE       shader_injection[6][1]
+#define RENODX_SWAP_CHAIN_CUSTOM_COLOR_SPACE      shader_injection[6][2]
+#define RENODX_SWAP_CHAIN_ENCODING                shader_injection[6][3]
+#define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE    shader_injection[7][0]
+#define CUSTOM_RANDOM                             shader_injection[7][1]
 #define CUSTOM_AA_BLUR_STRENGTH                   shader_injection[7][2]
 #define CUSTOM_BLOOM_RADIUS                       shader_injection[7][3]
 #define CUSTOM_CHROMACITY_EFFECTS_STRENGTH        shader_injection[8][0]
@@ -100,7 +101,7 @@ float4 shader_injection[10] : register(c50);
 #define RENODX_RENO_DRT_TONE_MAP_METHOD           renodx::tonemap::renodrt::config::tone_map_method::HERMITE_SPLINE
 #else
 #if ((__SHADER_TARGET_MAJOR == 5 && __SHADER_TARGET_MINOR >= 1) || __SHADER_TARGET_MAJOR >= 6)
-cbuffer shader_injection : register(b13, space50) {
+cbuffer shader_injection : register(b13, space150) {
   ShaderInjectData shader_injection : packoffset(c0);
 }
 #elif (__SHADER_TARGET_MAJOR < 5) || ((__SHADER_TARGET_MAJOR == 5) && (__SHADER_TARGET_MINOR < 1))
@@ -137,6 +138,7 @@ cbuffer shader_injection : register(b13) {
 #define RENODX_SWAP_CHAIN_ENCODING                shader_injection.swap_chain_encoding
 #define RENODX_SWAP_CHAIN_ENCODING_COLOR_SPACE    shader_injection.swap_chain_encoding_color_space
 #define RENODX_RENO_DRT_TONE_MAP_METHOD           renodx::tonemap::renodrt::config::tone_map_method::HERMITE_SPLINE
+#define CUSTOM_RANDOM                             shader_injection.custom_random
 #define CUSTOM_AA_BLUR_STRENGTH                   shader_injection.custom_AA_blur_strength
 #define CUSTOM_BLOOM_RADIUS                       shader_injection.custom_bloom_radius
 #define CUSTOM_CHROMACITY_EFFECTS_STRENGTH        shader_injection.custom_chromacity_effects_strength
